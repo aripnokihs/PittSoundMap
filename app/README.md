@@ -1,2 +1,0 @@
-# PittSoundMap
-For Steelhacks XII
