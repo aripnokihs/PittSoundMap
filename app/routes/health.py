@@ -1,5 +1,6 @@
 from fastapi import APIRouter
 from app.db import engine
+from sqlalchemy import text
 
 router = APIRouter()
 
@@ -11,7 +12,7 @@ def health():
 def db_connection():
     try:
         with engine.connect() as conn:
-            conn.execute("SELECT 1")
+            conn.execute(text("SELECT 1"))
         return {"status": "ok", "db": "connected"}
     except Exception as e:
         return {"status": "error", "db": f"connection failed: {e}"}
