@@ -1,24 +1,15 @@
 import os
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker, declarative_base
+import psycopg_pool
 from dotenv import load_dotenv
 
 load_dotenv()
 
-DATABASE_URL = os.getenv("DATABASE_URL")
+conninfo = (
+    f"host={os.getenv('DB_HOST', 'localhost')} "
+    f"port={os.getenv('DB_PORT', 5432)} "
+    f"dbname={os.getenv('DB_NAME', 'postgres')} "
+    f"user={os.getenv('DB_USER', 'postgres')} "
+    f"password={os.getenv('DB_PASSWORD', 'postgres')}"
+)
 
-engine = create_engine(DATABASE_URL,
-                       echo=True,
-                       pool_pre_ping=True
-                       )
-
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-
-Base = declarative_base()
-
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
+pool = psycopg_pool.AsyncConnectionPool(conninfo=conninfo)
