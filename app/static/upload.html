@@ -93,9 +93,19 @@
     <h2>Upload a Sound</h2>
 
     <form id="uploadForm">
-      <!-- Time selector -->
-      <label for="time">Recording Time</label>
-      <input type="datetime-local" id="time" name="time" required>
+      <!-- Date selector -->
+      <label for="date">Recording Date</label>
+      <input type="date" id="date" name="date" required>
+
+      <!-- Time of day selector -->
+      <label for="timeOfDay">Time of Day</label>
+      <select id="timeOfDay" name="timeOfDay" required>
+        <option value="">-- Choose Time of Day --</option>
+        <option value="morning">Morning</option>
+        <option value="afternoon">Afternoon</option>
+        <option value="evening">Evening</option>
+        <option value="midnight">Midnight</option>
+      </select>
 
       <!-- Audio file selector -->
       <label for="audioFile">Select Audio File</label>
