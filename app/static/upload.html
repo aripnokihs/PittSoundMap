@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Upload Sound - Pitt Sound Map</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f5f7fa;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .upload-container {
+      background: white;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.15);
+      width: 400px;
+    }
+
+    h2 {
+      margin-top: 0;
+      color: #003594; /* Pitt blue */
+      text-align: center;
+    }
+
+    label {
+      display: block;
+      margin-top: 15px;
+      font-weight: bold;
+      color: #333;
+    }
+
+    input, select, textarea, button {
+      width: 100%;
+      margin-top: 5px;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 14px;
+      box-sizing: border-box;
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 70px;
+    }
+
+    .button-row {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 20px;
+    }
+
+    .btn {
+      flex: 1;
+      margin: 0 5px;
+      border: none;
+      border-radius: 6px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+    }
+
+    .btn-submit {
+      background-color: #003594; /* Pitt blue */
+      color: white;
+    }
+
+    .btn-submit:hover {
+      background-color: #FFB81C; /* Pitt gold */
+      color: black;
+    }
+
+    .btn-cancel {
+      background-color: #ddd;
+      color: black;
+    }
+
+    .btn-cancel:hover {
+      background-color: #bbb;
+    }
+  </style>
+</head>
+<body>
+  <div class="upload-container">
+    <h2>Upload a Sound</h2>
+
+    <form id="uploadForm">
+      <!-- Date selector -->
+      <label for="date">Recording Date</label>
+      <input type="date" id="date" name="date" required>
+
+      <!-- Time of day selector -->
+      <label for="timeOfDay">Time of Day</label>
+      <select id="timeOfDay" name="timeOfDay" required>
+        <option value="">-- Choose Time of Day --</option>
+        <option value="morning">Morning</option>
+        <option value="afternoon">Afternoon</option>
+        <option value="evening">Evening</option>
+        <option value="midnight">Midnight</option>
+      </select>
+
+      <!-- Audio file selector -->
+      <label for="audioFile">Select Audio File</label>
+      <input type="file" id="audioFile" name="audioFile" accept=".mp3,.wav,.ogg,.m4a" required>
+
+      <!-- Tag selector -->
+      <label for="tags">Category</label>
+      <select id="tags" name="tags" required>
+        <option value="">-- Choose a Tag --</option>
+        <option value="daily">Daily Sound</option>
+        <option value="event">Event</option>
+        <option value="incident">Incident</option>
+      </select>
+
+      <!-- Description -->
+      <label for="description">Description</label>
+      <textarea id="description" name="description" placeholder="Add a short description..."></textarea>
+
+      <!-- Buttons -->
+      <div class="button-row">
+        <button type="button" class="btn btn-cancel" onclick="cancelUpload()">Cancel</button>
+        <button type="submit" class="btn btn-submit">Submit</button>
+      </div>
+    </form>
+  </div>
+
+  <script>
+    const form = document.getElementById("uploadForm");
+
+    form.addEventListener("submit", function(e) {
+      e.preventDefault();
+      alert("Sound submitted successfully! (hook this up to your backend later)");
+    });
+
+    function cancelUpload() {
+      if (confirm("Cancel upload?")) {
+        window.location.href = "index.html"; // Go back to map or homepage
+      }
+    }
+  </script>
+</body>
+</html>
