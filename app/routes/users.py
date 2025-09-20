@@ -19,13 +19,13 @@ def root():
     return {"status": "up"}
 
 @router.post("/add")
-async def add_user(username: str = Form(...)):
+async def add_user(username: str = Form(...), password: str = Form(...)):
     try:
         with psycopg.connect(conninfo) as conn:
             with conn.cursor() as cur:
                 cur.execute(
                     "INSERT INTO users (username, password_hash) VALUES (%s, %s) RETURNING user_id",
-                    (username, "hashedpassword")
+                    (username, password)
                 )
                 user_id = cur.fetchone()[0]
                 conn.commit()

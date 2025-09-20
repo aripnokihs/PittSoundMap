@@ -20,4 +20,4 @@ app.include_router(users.router, prefix=f"{API_VERSION}/users", tags=["Users"])
 
 @app.get("/")
 def read_index():
-    return FileResponse(os.path.join(os.path.dirname(__file__), "static", "test.html"))
+    return FileResponse(os.path.join(os.path.dirname(__file__), "static", "signup.html"))
