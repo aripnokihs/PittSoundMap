@@ -364,9 +364,9 @@
     });
 
     // Dummy button actions
-    function uploadSound() {
+    function uploadSound(placeName) {
       // alert("Upload sound feature coming soon!");
-      window.location.href = "upload.html";
+      window.location.href = "upload.html?place=" + encodeURIComponent(placeName);
     }
 
     function login() {

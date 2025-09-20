@@ -104,6 +104,15 @@
             <!-- Title field -->
             <label for="title">Title</label>
             <input type="text" id="title" name="title" placeholder="Enter a title for the sound" required>
+            <label for="location">Location</label>
+            <input id="place" name="place" readonly>
+            <script>
+            const urlParams = new URLSearchParams(window.location.search);
+            const place = urlParams.get("place");
+            if (place) {
+                document.getElementById("place").value = place;
+            }
+            </script>
 
             <!-- Date selector -->
             <label for="date">Recording Date</label>
@@ -120,7 +129,7 @@
             </select>
 
             <!-- Audio file selector -->
-            <label for="audioFile">Select Audio File</label>
+            <label for="audioFile">Select Audio File (<30s)</label>
             <input type="file" id="audioFile" name="audioFile" accept=".mp3,.wav,.ogg,.m4a" required>
 
             <!-- Tag selector -->
@@ -133,7 +142,7 @@
             </select>
 
             <!-- Description -->
-            <label for="description">Description</label>
+            <label for="description">Description (optional)</label>
             <textarea id="description" name="description" placeholder="Add a short description..."></textarea>
 
             <!-- Buttons -->
