@@ -72,8 +72,9 @@
         
         <!--Password-->
         <label for="password" style="padding: 10px;"><b>Password:</b></label> 
-        <input type = "password" placeholder="Enter Password" password = "password"> 
+        <input type = "password" placeholder="Enter Password" name = "password"> 
         <button type="submit">Login</button>
+        <button type="button" onclick="cancel()"> Cancel </button>
         
         <a href="signup.html" class = "signup-link">New to Pitt Sound Map?</a>
         </form>
@@ -82,7 +83,7 @@
     <script>
         const form = document.getElementById("login");
        form.addEventListener("submit", async(event) => {
-        event.preventDefault;
+        event.preventDefault();
 
        const username = form.elements["username"].value;
        const password = form.elements["password"].value;
@@ -96,6 +97,9 @@
 
 
     });
+    function cancel(){
+        window.location.href ="index.html"
+    }
     </script>
 
 </body>
