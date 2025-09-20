@@ -1,0 +1,35 @@
+# Initial generated .gitignore (make changes)
+
+# Byte-compiled / cache
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pyc
+
+# Virtual environment
+.env
+.venv
+venv/
+ENV/
+env/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDEs
+.vscode/
+.idea/
+
+# Local database / cache
+*.db
+*.sqlite3
+
+# Uploads folder (don’t commit big media files)
+uploads/
+
+# Python packaging
+*.egg-info/
+dist/
+build/
