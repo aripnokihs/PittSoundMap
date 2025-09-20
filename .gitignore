@@ -24,7 +24,6 @@ Thumbs.db
 
 # Local database / cache
 *.db
-*.sqlite3
 
 # Uploads folder (don’t commit big media files)
 uploads/
