@@ -43,6 +43,19 @@
       background-color: #FFB81C; /* Pitt gold */
       color: black;
     }
+    .popup-audio {
+      margin-top: 10px;
+    }
+    .popup-audio audio {
+      width: 100%;
+    }
+    .popup-meta {
+      font-size: 12px;
+      color: #555;
+    }
+    .leaflet-popup-content {
+      width: 450px !important;
+    }
   </style>
 </head>
 <body>
@@ -54,7 +67,6 @@
   <!-- Login button (top-right) -->
   <div class="top-right">
     <button onclick="login()">Login</button>
-    
   </div>
 
   <!-- Map container -->
@@ -73,15 +85,69 @@
       attribution: '© OpenStreetMap contributors'
     }).addTo(map);
 
-    // Add some demo pins
-    var marker1 = L.marker([40.4442, -79.9605]).addTo(map);
-    marker1.bindPopup("<b>Cathedral of Learning</b><br>Bell tower sound here.");
+    // Example data structure for places and their audios
+    var placeData = {
+      "cathedral": {
+        name: "Cathedral of Learning",
+        coords: [40.4442, -79.9605],
+        audios: [
+          { title: "Bell Tower", file: "audio/song.mp3", date: "2025-09-15", timeOfDay: "morning", tag: "daily", description: "Classic Pitt bell sound." },
+          { title: "Class Change Chatter", file: "audio/chatter.mp3", date: "2025-09-16", timeOfDay: "afternoon", tag: "daily", description: "Students moving between classes." }
+        ]
+      },
+      "schenley": {
+        name: "Schenley Plaza",
+        coords: [40.4429, -79.9575],
+        audios: [
+          { title: "Plaza Ambience", file: "audio/plaza.mp3", date: "2025-09-12", timeOfDay: "evening", tag: "event", description: "Relaxing plaza sounds." }
+        ]
+      },
+      "forbes": {
+        name: "Forbes & Bigelow",
+        coords: [40.4452, -79.9620],
+        audios: [
+          { title: "Traffic Light Beep", file: "audio/traffic.mp3", date: "2025-09-10", timeOfDay: "morning", tag: "incident", description: "Accessibility crosswalk beep." },
+          { title: "Car Horns", file: "audio/horns.mp3", date: "2025-09-11", timeOfDay: "midnight", tag: "incident", description: "Loud horns at busy intersection." }
+        ]
+      }
+    };
 
-    var marker2 = L.marker([40.4429, -79.9575]).addTo(map);
-    marker2.bindPopup("<b>Schenley Plaza</b><br>Ambient student chatter.");
+    function getMimeType(file) {
+      if (file.endsWith(".mp3")) return "audio/mpeg";
+      if (file.endsWith(".m4a")) return "audio/mp4";
+      if (file.endsWith(".wav")) return "audio/wav";
+      if (file.endsWith(".ogg")) return "audio/ogg";
+      return "audio/mpeg"; // fallback
+    }
 
-    var marker3 = L.marker([40.4452, -79.9620]).addTo(map);
-    marker3.bindPopup("<b>Forbes & Bigelow</b><br>Traffic light accessibility sound.");
+    function buildPopup(place) {
+      let html = `<b>${place.name}</b><br>`;
+      place.audios.forEach(a => {
+        const mime = getMimeType(a.file);
+        html += `
+          <div class="popup-audio">
+            <strong>${a.title}</strong><br>
+            <audio controls controlsList="nodownload">
+              <source src="${a.file}" type="${mime}">
+              Your browser does not support audio.
+            </audio>
+            <div class="popup-meta">
+              <em>${a.date}, ${a.timeOfDay}</em><br>
+              <span>Tag: ${a.tag}</span><br>
+              <span>${a.description}</span>
+            </div>
+          </div>
+        `;
+      });
+      return html;
+    }
+
+
+    // Create markers with audio popups
+    Object.values(placeData).forEach(place => {
+      var marker = L.marker(place.coords).addTo(map);
+      marker.bindPopup(buildPopup(place));
+    });
 
     // Dummy button actions
     function uploadSound() {
