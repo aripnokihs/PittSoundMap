@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 import os
 import app.models
 import asyncio
@@ -17,6 +18,7 @@ app = FastAPI()
 app.include_router(health.router, prefix=f"{API_VERSION}/health", tags=["Health"])
 app.include_router(users.router, prefix=f"{API_VERSION}/users", tags=["Users"])
 
+app.mount("/static", StaticFiles(directory=os.path.join(os.path.dirname(__file__), "static")), name="static")
 
 @app.get("/")
 def read_index():

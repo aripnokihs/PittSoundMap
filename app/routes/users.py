@@ -1,5 +1,6 @@
 import os
 from fastapi import APIRouter, Form, Depends
+from fastapi.responses import FileResponse, RedirectResponse
 from app.db import pool
 import psycopg
 from psycopg.rows import dict_row
@@ -29,6 +30,6 @@ async def add_user(username: str = Form(...), password: str = Form(...)):
                 )
                 user_id = cur.fetchone()[0]
                 conn.commit()
-        return {"status": "success", "user_id": user_id}
+        return RedirectResponse(url="/static/index.html", status_code=303)
     except Exception as e:
         return {"status": "error", "message": str(e)}
