@@ -190,7 +190,7 @@ form.addEventListener("submit", async function (e) {
     const formData = new FormData(form);
 
     try {
-        const response = await fetch("/v1/audio/upload", { // make sure this matches router prefix
+        const response = await fetch("/v1/audios/upload", { // make sure this matches router prefix
             method: "POST",
             body: formData
         });

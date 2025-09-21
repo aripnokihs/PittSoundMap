@@ -1,63 +1,76 @@
-<!DOCTYPE html>
 <html>
+
 <head>
   <meta charset="utf-8" />
   <title>Pitt Sound Map Prototype</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  
+
   <!-- Leaflet CSS -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
-  
+
   <style>
-    body, html {
+    body,
+    html {
       margin: 0;
       height: 100%;
       width: 100%;
     }
+
     #map {
       height: 100%;
       width: 100%;
     }
+
     .top-left {
       position: absolute;
       top: 10px;
       left: 10px;
       z-index: 1000;
     }
+
     .top-right {
       position: absolute;
       top: 10px;
       right: 10px;
       z-index: 1000;
     }
+
     button {
       padding: 8px 12px;
-      background-color: #003594; /* Pitt blue */
+      background-color: #003594;
+      /* Pitt blue */
       color: white;
       border: none;
       border-radius: 6px;
       cursor: pointer;
       font-weight: bold;
     }
+
     button:hover {
-      background-color: #FFB81C; /* Pitt gold */
+      background-color: #FFB81C;
+      /* Pitt gold */
       color: black;
     }
+
     .popup-audio {
       margin-top: 10px;
     }
+
     .popup-audio audio {
       width: 100%;
     }
+
     .popup-meta {
       font-size: 12px;
       color: #555;
     }
+
     .leaflet-popup-content {
       width: 450px !important;
     }
   </style>
 </head>
+
 <body>
   <!-- Upload button (top-left) -->
   <!-- <div class="top-left">
@@ -71,10 +84,10 @@
 
   <!-- Map container -->
   <div id="map"></div>
-  
+
   <!-- Leaflet JS -->
   <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-  
+
   <script>
 
     // =====================================
@@ -138,16 +151,7 @@
         name: "Schenley Plaza",
         coords: [40.44291, -79.95241],
         audios: [
-          { title: "Plaza Ambience", file: "audio/plaza.mp3", date: "2025-09-12", timeOfDay: "evening", tag: "event", description: "Relaxing plaza sounds." },
-          { title: "PA2", file: "audio/plaza.mp3", date: "2025-09-12", timeOfDay: "evening", tag: "daily", description: "Relaxing plaza sounds." },
-          { title: "PA3", file: "audio/plaza.mp3", date: "2025-09-12", timeOfDay: "evening", tag: "incident", description: "Relaxing plaza sounds." },
-          { title: "PA4", file: "audio/plaza.mp3", date: "2025-09-12", timeOfDay: "evening", tag: "incident", description: "Relaxing plaza sounds." },
-          { title: "PA5", file: "audio/plaza.mp3", date: "2025-09-12", timeOfDay: "evening", tag: "daily", description: "Relaxing plaza sounds." },
-          { title: "PA6", file: "audio/plaza.mp3", date: "2025-09-12", timeOfDay: "evening", tag: "incident", description: "Relaxing plaza sounds." },
-          { title: "PA7", file: "audio/plaza.mp3", date: "2025-09-12", timeOfDay: "evening", tag: "incident", description: "Relaxing plaza sounds." },
-          { title: "PA8", file: "audio/plaza.mp3", date: "2025-09-12", timeOfDay: "evening", tag: "daily", description: "Relaxing plaza sounds." },
-          { title: "PA9", file: "audio/plaza.mp3", date: "2025-09-12", timeOfDay: "evening", tag: "incident", description: "Relaxing plaza sounds." },
-          { title: "PA10", file: "audio/plaza.mp3", date: "2025-09-12", timeOfDay: "evening", tag: "daily", description: "Relaxing plaza sounds." }
+          { title: "Plaza Ambience", file: "audio/plaza.mp3", date: "2025-09-12", timeOfDay: "evening", tag: "event", description: "Relaxing plaza sounds." }
         ]
       },
       "forbes": {
@@ -376,9 +380,28 @@
       return "audio/mpeg"; // fallback
     }
 
-    function buildPopup(place) {
-      let html = `<b>${place.name}</b><br>`;
-
+    // function buildPopup(place) {
+    //   let html = `<b>${place.name}</b><br>`;
+    //   place.audios.forEach(a => {
+    //     const mime = getMimeType(a.file);
+    //     html += `
+    //       <div class="popup-audio">
+    //         <strong>${a.title}</strong><br>
+    //         <audio controls controlsList="nodownload">
+    //           <source src="${a.file}" type="${mime}">
+    //           Your browser does not support audio.
+    //         </audio>
+    //         <div class="popup-meta">
+    //           <em>${a.date}, ${a.timeOfDay}</em><br>
+    //           <span>Tag: ${a.tag}</span><br>
+    //           <span>${a.description}</span>
+    //         </div>
+    //       </div>
+    //     `;
+    //   });
+    async function buildPopup(placeName) {
+      let html = `<b>${placeName}</b><br>`;
+      let audios = await fetchAudios(placeName);
       html += `
         <div class="popup-filters">
           <label><input type="checkbox" class="tag-filter" value="daily" checked> Daily</label>
@@ -388,145 +411,148 @@
         <div class="popup-audios"></div>
       `;
 
-      // place.audios.forEach(a => {
-      //   const mime = getMimeType(a.file);
-      //   html += `
-      //     <div class="popup-audio">
-      //       <strong>${a.title}</strong><br>
-      //       <audio controls controlsList="nodownload">
-      //         <source src="${a.file}" type="${mime}">
-      //         Your browser does not support audio.
-      //       </audio>
-      //       <div class="popup-meta">
-      //         <em>${a.date}, ${a.timeOfDay}</em><br>
-      //         <span>Tag: ${a.tag}</span><br>
-      //         <span>${a.description}</span>
-      //       </div>
-      //     </div>
-      //   `;
-      // });
+      html += renderAudioList(audios);
 
-      // fetching data for each pin
-      async function fetchAudios(place) {
-        try {
-            const res = await fetch(`/v1/audio/place/${encodeURIComponent(place)}`);
-            const data = await res.json();
-            if (data.error) {
-                console.error("Error fetching audios:", data.error);
-                return [];
-            }
-            return data.audios;
-        } catch (err) {
-            console.error("Fetch failed:", err);
-            return [];
+      html += `</div>`; // close audio-list div
+
+      // Upload / refresh buttons
+      html += isLoggedIn
+        ? `<div style="margin-top:10px; display:flex; gap:10px;">
+        <button onclick="uploadSound('${placeName}')">Upload Sound</button>
+        <button onclick="refreshAudios('${placeName}', this)">Refresh Audio</button>
+       </div>`
+        : `<div style="margin-top:10px; display:flex; gap:10px;">
+        <button disabled title="Login required">Upload Sound (Login first)</button>
+        <button onclick="refreshAudios('${placeName}', this)">Refresh Audio</button>
+       </div>`;
+
+      return html;
+    }
+
+    function renderAudioList(audios, filterTag = "all") {
+      let html = "";
+      audios
+        .filter(a => filterTag === "all" || a.tags === filterTag)
+        .forEach(a => {
+          const mime = getMimeType(a.file_path);
+          html += `
+        <div class="popup-audio">
+          <strong>${a.title}</strong><br>
+          <audio controls controlsList="nodownload">
+            <source src="${a.file_path}" type="${mime}">
+            Your browser does not support audio.
+          </audio>
+          <div class="popup-meta">
+            <em>${a.date}, ${a.time_of_day}</em><br>
+            <span>Tag: ${a.tags}</span><br>
+            <span>${a.description || ""}</span>
+          </div>
+        </div>
+      `;
+        });
+      return html || "<em>No audio for this tag.</em>";
+    }
+
+    function filterAudios(placeName, selectEl) {
+      const selectedTag = selectEl.value;
+      const popupContent = selectEl.closest(".leaflet-popup-content");
+      const audioListDiv = popupContent.querySelector("#audio-list");
+
+      fetchAudios(placeName).then(audios => {
+        audioListDiv.innerHTML = renderAudioList(audios, selectedTag);
+      });
+    }
+
+
+    // fetching data for each pin
+    async function fetchAudios(place) {
+      try {
+        const res = await fetch(`/v1/audios/${encodeURIComponent(place)}`);
+        const data = await res.json();
+        if (data.error) {
+          console.error("Error fetching audios:", data.error);
+          return [];
         }
+        return data.audios;
+      } catch (err) {
+        console.error("Fetch failed:", err);
+        return [];
       }
-      // refresh button
-html += `
-  <div style="margin-top:10px; display:flex; justify-content:space-between; align-items:center;">
-    ${
-      isLoggedIn
-        ? `<button class="upload-btn" data-place="${place.name}">Upload Sound</button>`
-        : `<button disabled title="Login required">Upload Sound (Login first)</button>`
-    }
-    <button class="refresh-btn" data-place="${place.name}">🔄 Refresh</button>
-  </div>
-`;
-return html;
     }
 
-function renderAudios(container, audios, activeTags) {
-  const filtered = audios.filter(a => activeTags.includes(a.tag));
-  if (filtered.length === 0) {
-    container.innerHTML = `<em>No audios match selected tags.</em>`;
-    return;
-  }
-  const shuffled = [...filtered].sort(() => 0.5 - Math.random());
-  const limited = shuffled.slice(0, 3);
+    async function refreshAudios(placeName, buttonEl) {
+      let audios = await fetchAudios(placeName);
+      audios = shuffleArray(audios);
 
-  container.innerHTML = limited.map(a => {
-    const mime = getMimeType(a.file);
-    return `
+      let html = `<b>${placeName}</b><br>`;
+
+      audios.forEach(a => {
+        const mime = getMimeType(a.file_path);
+        html += `
       <div class="popup-audio">
         <strong>${a.title}</strong><br>
         <audio controls controlsList="nodownload">
-          <source src="${a.file}" type="${mime}">
+          <source src="${a.file_path}" type="${mime}">
           Your browser does not support audio.
         </audio>
         <div class="popup-meta">
-          <em>${a.date}, ${a.timeOfDay}</em><br>
-          <span>Tag: ${a.tag}</span><br>
-          <span>${a.description}</span>
+          <em>${a.date}, ${a.time_of_day}</em><br>
+          <span>Tag: ${a.tags}</span><br>
+          <span>${a.description || ""}</span>
         </div>
       </div>
     `;
-  }).join("");
-}
+      });
+
+      // Re-add bottom buttons
+      let buttonsHTML = `<div style="margin-top:10px; display: flex; gap: 10px;">`;
+      if (isLoggedIn) {
+        buttonsHTML += `<button onclick="uploadSound('${placeName}')">Upload Sound</button>
+                    <button onclick="refreshAudios('${placeName}', this)">Refresh Audio</button>`;
+      } else {
+        buttonsHTML += `<button disabled title="Login required">Upload Sound (Login first)</button>
+                    <button onclick="refreshAudios('${placeName}', this)">Refresh Audio</button>`;
+      }
+      buttonsHTML += `</div>`;
+
+      html += buttonsHTML;
+
+      // Update popup content
+      const popup = buttonEl.closest(".leaflet-popup-content");
+      if (popup) {
+        popup.innerHTML = html;
+      }
+    }
 
 
 
-function refreshAudios(placeName) {
-  const place = Object.values(placeData).find(p => p.name === placeName);
-  if (!place) return;
+    // // Create markers, update popup dynamically on open
+    // Object.values(placeData).forEach(place => {
+    //   var marker = L.marker(place.coords).addTo(map);
 
-  // Find the popup’s audio container
-  const container = document.querySelector(".leaflet-popup-content .popup-audio-list");
-  if (container) {
-    container.innerHTML = renderAudios(place.audios, ["daily","event","incident"]);
-  }
-}
+    //   // attach an empty popup (required for click-to-open)
+    //   marker.bindPopup("");
+
+    //   // when popup opens, rebuild its content based on login status
+    //   marker.on("popupopen", function (e) {
+    //     e.popup.setContent(buildPopup(place));
+    //   });
+    // });
 
 
+    Object.entries(placeData).forEach(([key, place]) => {
+      const marker = L.marker(place.coords).addTo(map);
 
+      // Bind placeholder
+      marker.bindPopup("Loading...");
 
-    // Create markers, update popup dynamically on open
-    Object.values(placeData).forEach(place => {
-      var marker = L.marker(place.coords).addTo(map);
-
-      // attach an empty popup (required for click-to-open)
-      marker.bindPopup("");
-
-      // when popup opens, rebuild its content based on login status
-marker.on("popupopen", function (e) {
-  e.popup.setContent(buildPopup(place));
-
-  const popupEl   = e.popup.getElement();
-  const container = popupEl.querySelector(".popup-audios");
-  const checkboxes = popupEl.querySelectorAll(".tag-filter");
-
-  // initial render (all checked)
-  let activeTags = Array.from(checkboxes).map(cb => cb.value);
-  renderAudios(container, place.audios, activeTags);
-
-  // checkbox filtering
-  checkboxes.forEach(cb => {
-    cb.addEventListener("change", () => {
-      activeTags = Array.from(checkboxes)
-        .filter(c => c.checked)
-        .map(c => c.value);
-      renderAudios(container, place.audios, activeTags);
+      // When popup opens, fetch & replace content
+      marker.on("popupopen", async function (e) {
+        console.log("Popup opened for:", place.name);
+        const content = await buildPopup(place.name);
+        e.popup.setContent(content);
+      });
     });
-  });
-
-  // refresh button (re-randomize within current filters)
-  const refreshBtn = popupEl.querySelector(".refresh-btn");
-  if (refreshBtn) {
-    refreshBtn.addEventListener("click", () => {
-      const currentTags = Array.from(checkboxes)
-        .filter(c => c.checked)
-        .map(c => c.value);
-      renderAudios(container, place.audios, currentTags);
-    });
-  }
-
-  // upload button
-  const uploadBtn = popupEl.querySelector(".upload-btn");
-  if (uploadBtn) {
-    uploadBtn.addEventListener("click", () => uploadSound(place.name));
-  }
-});
-    });
-
     // Dummy button actions
     function uploadSound(placeName) {
       // alert("Upload sound feature coming soon!");
@@ -537,6 +563,13 @@ marker.on("popupopen", function (e) {
       window.location.href = "/login";
     }
 
+    function shuffleArray(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+      return array;
+    }
     // function login() {
     //   // fake login for demo — replace with fetch("/users/get")
     //   fetch("/v1/users/get", {
@@ -556,34 +589,34 @@ marker.on("popupopen", function (e) {
     // }
 
     async function checkSession() {
-  try {
-    const res = await fetch("/v1/users/session");
-    const data = await res.json();
-    if (data.user) {
-      isLoggedIn = true;
-      currentUser = data.user;
-    } else {
-      isLoggedIn = false;
-      currentUser = null;
+      try {
+        const res = await fetch("/v1/users/session");
+        const data = await res.json();
+        if (data.user) {
+          isLoggedIn = true;
+          currentUser = data.user;
+        } else {
+          isLoggedIn = false;
+          currentUser = null;
+        }
+        renderStatus();
+      } catch (err) {
+        console.error("Failed to fetch session:", err);
+      }
     }
-    renderStatus();
-  } catch (err) {
-    console.error("Failed to fetch session:", err);
-  }
-}
 
-function logout() {
-  fetch("/v1/users/logout", { method: "POST" })
-    .then(() => {
-      isLoggedIn = false;
-      currentUser = null;
-      renderStatus();
-    });
-}
+    function logout() {
+      fetch("/v1/users/logout", { method: "POST" })
+        .then(() => {
+          isLoggedIn = false;
+          currentUser = null;
+          renderStatus();
+        });
+    }
 
-// existing renderStatus() stays the same...
-// just call checkSession() on page load
-checkSession();
+    // existing renderStatus() stays the same...
+    // just call checkSession() on page load
+    checkSession();
 
     // =====================================
     // Init
@@ -591,4 +624,5 @@ checkSession();
     renderStatus();
   </script>
 </body>
+
 </html>
