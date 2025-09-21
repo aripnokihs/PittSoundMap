@@ -108,7 +108,7 @@
             <input id="place" name="place" readonly>
             <script>
             const urlParams = new URLSearchParams(window.location.search);
-            const place = urlParams.get("place");
+            const place = decodeURIComponent(urlParams.get("place") || "");
             if (place) {
                 document.getElementById("place").value = place;
             }
