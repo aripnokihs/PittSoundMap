@@ -5,9 +5,6 @@
 
 The Pitt Map of Sounds is an interactive platform that enhances **accessibility on campus** while also helping **alumni reconnect with familiar places** through sound.
 
-* For **current students and visitors**, the map provides auditory cues about traffic signals, daily campus activity, and special events — supporting users with visual impairments or those seeking greater spatial awareness.
-* For **alumni**, the map serves as an immersive memory portal, allowing them to hear iconic campus sounds (Cathedral bells, Schenley Plaza chatter, Forbes traffic lights) and relive their Pitt experience.
-
 ## ✨ Features
 
 * 📍 **Interactive Map (Leaflet.js)**: Explore Pitt landmarks, tap pins, and hear authentic recordings.
@@ -16,8 +13,6 @@ The Pitt Map of Sounds is an interactive platform that enhances **accessibility 
 * 🔍 **Accessibility First**: Sounds like crosswalk beeps and traffic signals aid navigation for visually impaired students.
 * 🎓 **Alumni Recall**: Alumni can relive the atmosphere of Pitt through ambient campus recordings.
 
-![Screenshot Placeholder - Map View](/assets/map-screenshot.png)
-*(Insert a screenshot of the map interface with pins)*
 
 ## 🏗️ Tech Stack
 
@@ -37,8 +32,8 @@ The Pitt Map of Sounds is an interactive platform that enhances **accessibility 
 ### Backend Setup
 
 ```bash
-git clone https://github.com/<your-repo>/pitt-sound-map.git
-cd pitt-sound-map/backend
+git clone
+cd
 
 # Create virtual environment
 python3 -m venv venv
@@ -48,7 +43,7 @@ source venv/bin/activate
 pip install -r requirements.txt
 
 # Run FastAPI server
-uvicorn main:app --reload
+uvicorn app.backend:app --reload
 ```
 
 
@@ -57,9 +52,6 @@ uvicorn main:app --reload
 * **Visually Impaired Students**: Crosswalk signals and environmental cues assist safe navigation.
 * **Neurodiverse Users**: Predictable and tagged sound environments reduce sensory surprises.
 * **Alumni Memory Recall**: Sounds tied to campus locations trigger vivid recollections and emotional connections.
-
-![Screenshot Placeholder - Upload Form](/assets/upload-form.png)
-*(Insert screenshot of your upload form)*
 
 ## 🔮 Future Improvements
 
