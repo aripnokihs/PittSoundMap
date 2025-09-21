@@ -33,4 +33,8 @@ uploads/
 dist/
 build/
 
+<<<<<<< HEAD
 /app/static/audio
+=======
+/app/static/audio
+>>>>>>> brandon-testing-branch
