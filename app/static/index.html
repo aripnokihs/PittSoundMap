@@ -141,6 +141,13 @@
           { title: "Plaza Ambience", file: "audio/plaza.mp3", date: "2025-09-12", timeOfDay: "evening", tag: "event", description: "Relaxing plaza sounds." },
           { title: "PA2", file: "audio/plaza.mp3", date: "2025-09-12", timeOfDay: "evening", tag: "daily", description: "Relaxing plaza sounds." },
           { title: "PA3", file: "audio/plaza.mp3", date: "2025-09-12", timeOfDay: "evening", tag: "incident", description: "Relaxing plaza sounds." },
+          { title: "PA4", file: "audio/plaza.mp3", date: "2025-09-12", timeOfDay: "evening", tag: "incident", description: "Relaxing plaza sounds." },
+          { title: "PA5", file: "audio/plaza.mp3", date: "2025-09-12", timeOfDay: "evening", tag: "daily", description: "Relaxing plaza sounds." },
+          { title: "PA6", file: "audio/plaza.mp3", date: "2025-09-12", timeOfDay: "evening", tag: "incident", description: "Relaxing plaza sounds." },
+          { title: "PA7", file: "audio/plaza.mp3", date: "2025-09-12", timeOfDay: "evening", tag: "incident", description: "Relaxing plaza sounds." },
+          { title: "PA8", file: "audio/plaza.mp3", date: "2025-09-12", timeOfDay: "evening", tag: "daily", description: "Relaxing plaza sounds." },
+          { title: "PA9", file: "audio/plaza.mp3", date: "2025-09-12", timeOfDay: "evening", tag: "incident", description: "Relaxing plaza sounds." },
+          { title: "PA10", file: "audio/plaza.mp3", date: "2025-09-12", timeOfDay: "evening", tag: "daily", description: "Relaxing plaza sounds." }
         ]
       },
       "forbes": {
@@ -414,41 +421,62 @@
             return [];
         }
       }
-
-    if (isLoggedIn) {
-        html += `<div style="margin-top:10px;">
-                   <button onclick="uploadSound('${place.name}')">Upload Sound</button>
-                 </div>`;
-      } else {
-        html += `<div style="margin-top:10px;">
-                   <button disabled title="Login required">Upload Sound (Login first)</button>
-                 </div>`;
-      }
-      return html;
+      // refresh button
+html += `
+  <div style="margin-top:10px; display:flex; justify-content:space-between; align-items:center;">
+    ${
+      isLoggedIn
+        ? `<button class="upload-btn" data-place="${place.name}">Upload Sound</button>`
+        : `<button disabled title="Login required">Upload Sound (Login first)</button>`
+    }
+    <button class="refresh-btn" data-place="${place.name}">🔄 Refresh</button>
+  </div>
+`;
+return html;
     }
 
-    function renderAudios(container, audios, activeTags) {
-      container.innerHTML = ""; // clear
-      audios
-        .filter(a => activeTags.includes(a.tag)) // ✅ filter by selected tags
-        .forEach(a => {
-          const mime = getMimeType(a.file);
-          container.innerHTML += `
-            <div class="popup-audio">
-              <strong>${a.title}</strong><br>
-              <audio controls controlsList="nodownload">
-                <source src="${a.file}" type="${mime}">
-                Your browser does not support audio.
-              </audio>
-              <div class="popup-meta">
-                <em>${a.date}, ${a.timeOfDay}</em><br>
-                <span>Tag: ${a.tag}</span><br>
-                <span>${a.description}</span>
-              </div>
-            </div>
-          `;
-    });
+function renderAudios(container, audios, activeTags) {
+  const filtered = audios.filter(a => activeTags.includes(a.tag));
+  if (filtered.length === 0) {
+    container.innerHTML = `<em>No audios match selected tags.</em>`;
+    return;
+  }
+  const shuffled = [...filtered].sort(() => 0.5 - Math.random());
+  const limited = shuffled.slice(0, 3);
+
+  container.innerHTML = limited.map(a => {
+    const mime = getMimeType(a.file);
+    return `
+      <div class="popup-audio">
+        <strong>${a.title}</strong><br>
+        <audio controls controlsList="nodownload">
+          <source src="${a.file}" type="${mime}">
+          Your browser does not support audio.
+        </audio>
+        <div class="popup-meta">
+          <em>${a.date}, ${a.timeOfDay}</em><br>
+          <span>Tag: ${a.tag}</span><br>
+          <span>${a.description}</span>
+        </div>
+      </div>
+    `;
+  }).join("");
 }
+
+
+
+function refreshAudios(placeName) {
+  const place = Object.values(placeData).find(p => p.name === placeName);
+  if (!place) return;
+
+  // Find the popup’s audio container
+  const container = document.querySelector(".leaflet-popup-content .popup-audio-list");
+  if (container) {
+    container.innerHTML = renderAudios(place.audios, ["daily","event","incident"]);
+  }
+}
+
+
 
 
     // Create markers, update popup dynamically on open
@@ -459,26 +487,44 @@
       marker.bindPopup("");
 
       // when popup opens, rebuild its content based on login status
-      marker.on("popupopen", function (e) {
-        e.popup.setContent(buildPopup(place));
+marker.on("popupopen", function (e) {
+  e.popup.setContent(buildPopup(place));
 
-        const container = e.popup.getElement().querySelector(".popup-audios");
-        const checkboxes = e.popup.getElement().querySelectorAll(".tag-filter");
+  const popupEl   = e.popup.getElement();
+  const container = popupEl.querySelector(".popup-audios");
+  const checkboxes = popupEl.querySelectorAll(".tag-filter");
 
-        // initial render (all checked)
-        let activeTags = Array.from(checkboxes).map(cb => cb.value);
-        renderAudios(container, place.audios, activeTags);
+  // initial render (all checked)
+  let activeTags = Array.from(checkboxes).map(cb => cb.value);
+  renderAudios(container, place.audios, activeTags);
 
-        // update on checkbox change
-        checkboxes.forEach(cb => {
-          cb.addEventListener("change", () => {
-            activeTags = Array.from(checkboxes)
-              .filter(c => c.checked)
-              .map(c => c.value);
-            renderAudios(container, place.audios, activeTags);
-          });
-        });
-      });
+  // checkbox filtering
+  checkboxes.forEach(cb => {
+    cb.addEventListener("change", () => {
+      activeTags = Array.from(checkboxes)
+        .filter(c => c.checked)
+        .map(c => c.value);
+      renderAudios(container, place.audios, activeTags);
+    });
+  });
+
+  // refresh button (re-randomize within current filters)
+  const refreshBtn = popupEl.querySelector(".refresh-btn");
+  if (refreshBtn) {
+    refreshBtn.addEventListener("click", () => {
+      const currentTags = Array.from(checkboxes)
+        .filter(c => c.checked)
+        .map(c => c.value);
+      renderAudios(container, place.audios, currentTags);
+    });
+  }
+
+  // upload button
+  const uploadBtn = popupEl.querySelector(".upload-btn");
+  if (uploadBtn) {
+    uploadBtn.addEventListener("click", () => uploadSound(place.name));
+  }
+});
     });
 
     // Dummy button actions
