@@ -199,7 +199,7 @@ form.addEventListener("submit", async function (e) {
     console.log("Upload response:", result);
 
     if (response.ok && result.status === "success") {
-      alert("Upload successful! Audio ID: " + result.audio_id);
+      alert("Upload successful!");
       window.location.href = "/";
     } else {
       // Support both FastAPI {"detail": "..."} and your {"message": "..."}
