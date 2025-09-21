@@ -59,7 +59,7 @@ async def get_user(username: str = Form(...), password: str = Form(...)):
             return {"status": "error", "message": "Invalid password"}
 
         # Login success → redirect to homepage
-        return RedirectResponse(url="/static/index.html", status_code=303)
+        return RedirectResponse(url=f"/?user={username}", status_code=303)
 
     except Exception as e:
         return {"status": "error", "message": str(e)}
