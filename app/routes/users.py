@@ -33,3 +33,19 @@ async def add_user(username: str = Form(...), password: str = Form(...)):
         return RedirectResponse(url="/static/index.html", status_code=303)
     except Exception as e:
         return {"status": "error", "message": str(e)}
+    
+@router.post("/get")
+async def get_user(username: str = Form(...), password: str = Form(...)):
+    try:
+        with psycopg.connect(conninfo, row_factory=dict_row) as conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    "SELECT username, password_hash FROM users WHERE username = %s AND password_hash = %s",
+                    (username,password)
+                )
+                user = cur.fetchone()
+        if not user:
+            return {"status": "error", "message": "User not found"}
+        return {"status": "success", "user": user}
+    except Exception as e:
+        return {"status": "error", "message": str(e)}
