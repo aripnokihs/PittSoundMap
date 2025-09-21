@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset = "UTF-8">
+    <title> Login - Pitt Sound Map</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style> 
+    body{
+        font-family: Arial, Helvetica, sans-serif, sans-serif;
+        background-image: url("pitt.jpg");
+        display: flex;
+        justify-content: center;
+        align-self: center;
+        /* Makes the centering fit to any screen*/
+        height: 100vh;
+    }
+
+    .login-box{
+        background-color: whitesmoke;
+        padding: auto;
+        border-radius: 10px;
+        height: 400px;
+        width: 500px;
+        padding: 10px;
+    }
+    input[type=text], input[type=password] {
+    width: 100%;
+    padding: 12px 20px;
+    margin: 10px 0;
+    display: block;
+    border: 2px solid #ccc;
+    box-sizing: border-box;
+
+}
+    button {
+    background-color: #003594;;
+    color: white;
+    padding: 14px 20px;
+    margin: 8px 0;
+    border: none;
+    cursor: pointer;
+    width: 100%;
+}
+    button:hover {
+    opacity: 0.8;
+}
+ .signup-link {
+        display: block;
+        background-color: #f1f1f1; 
+        color: #000; 
+        text-align: center;
+        text-decoration: none;
+        border-radius: 5px; 
+        box-sizing: border-box; 
+        cursor: pointer;
+    }
+
+    .signup-link:hover {
+        background-color: #ddd;
+    }
+
+
+</style>
+
+<body>
+    <div class="login-box">
+        <h1 style="text-align: center"> Login to Pitt Sound Map </h1>
+        <form id="login">
+        <!--Username-->
+        <label for="username" style="padding: 10px" ><b> Username:</b></label>
+        <input type = "text" placeholder="Enter Username" name = "username">
+        
+        <!--Password-->
+        <label for="password" style="padding: 10px;"><b>Password:</b></label> 
+        <input type = "password" placeholder="Enter Password" name = "password"> 
+        <button type="submit">Login</button>
+        <button type="button" onclick="cancel()"> Cancel </button>
+        
+        <a href="signup.html" class = "signup-link">New to Pitt Sound Map?</a>
+        </form>
+    </div>
+    
+    <script>
+        const form = document.getElementById("login");
+       form.addEventListener("submit", async(event) => {
+        event.preventDefault();
+
+       const username = form.elements["username"].value;
+       const password = form.elements["password"].value;
+
+        try{
+            response = await fetch()
+        }
+        catch{
+
+        }
+
+
+    });
+    function cancel(){
+        window.location.href ="index.html"
+    }
+    </script>
+
+</body>
+</html>

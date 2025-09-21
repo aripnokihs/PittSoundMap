@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Pitt Sound Map Prototype</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  
+  <style>
+    body, html {
+      margin: 0;
+      height: 100%;
+      width: 100%;
+    }
+    #map {
+      height: 100%;
+      width: 100%;
+    }
+    .top-left {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      z-index: 1000;
+    }
+    .top-right {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      z-index: 1000;
+    }
+    button {
+      padding: 8px 12px;
+      background-color: #003594; /* Pitt blue */
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    button:hover {
+      background-color: #FFB81C; /* Pitt gold */
+      color: black;
+    }
+    .popup-audio {
+      margin-top: 10px;
+    }
+    .popup-audio audio {
+      width: 100%;
+    }
+    .popup-meta {
+      font-size: 12px;
+      color: #555;
+    }
+    .leaflet-popup-content {
+      width: 450px !important;
+    }
+  </style>
+</head>
+<body>
+  <!-- Upload button (top-left) -->
+  <!-- <div class="top-left">
+    <button onclick="uploadSound()">Upload Sound</button>
+  </div> -->
+
+  <!-- Login button (top-right) -->
+  <div class="top-right">
+    <button onclick="login()">Login</button>
+  </div>
+
+  <!-- Map container -->
+  <div id="map"></div>
+  
+  <!-- Leaflet JS -->
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  
+  <script>
+    // Initialize map centered on University of Pittsburgh
+    var map = L.map('map').setView([40.444, -79.960], 15);
+
+    // Add OpenStreetMap tiles
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19,
+      attribution: '© OpenStreetMap contributors'
+    }).addTo(map);
+
+    // Example data structure for places and their audios
+    var placeData = {
+      "cathedral": {
+        name: "Cathedral of Learning",
+        coords: [40.44453, -79.95317],
+        audios: [
+          { title: "Bell Tower", file: "audio/song.mp3", date: "2025-09-15", timeOfDay: "morning", tag: "daily", description: "Classic Pitt bell sound." },
+          { title: "Class Change Chatter", file: "audio/chatter.mp3", date: "2025-09-16", timeOfDay: "afternoon", tag: "daily", description: "Students moving between classes." }
+        ]
+      },
+      "schenley": {
+        name: "Schenley Plaza",
+        coords: [40.44291, -79.95241],
+        audios: [
+          { title: "Plaza Ambience", file: "audio/plaza.mp3", date: "2025-09-12", timeOfDay: "evening", tag: "event", description: "Relaxing plaza sounds." }
+        ]
+      },
+      "forbes": {
+        name: "Forbes & Bigelow",
+        coords: [40.443207, -79.953555],
+        audios: [
+          { title: "Traffic Light Beep", file: "audio/traffic.mp3", date: "2025-09-10", timeOfDay: "morning", tag: "incident", description: "Accessibility crosswalk beep." },
+          { title: "Car Horns", file: "audio/horns.mp3", date: "2025-09-11", timeOfDay: "midnight", tag: "incident", description: "Loud horns at busy intersection." }
+        ]
+      },
+      "cathy_crossing": {
+        name: "Pedestrian Crossing in front of Cathedral",
+        coords: [40.443843, -79.954081],
+        audios: [
+          { title: "Traffic Light Beep", file: "audio/traffic.mp3", date: "2025-09-10", timeOfDay: "morning", tag: "incident", description: "Accessibility crosswalk beep." },
+          { title: "Car Horns", file: "audio/horns.mp3", date: "2025-09-11", timeOfDay: "midnight", tag: "incident", description: "Loud horns at busy intersection." }
+        ]
+      },
+      "cathy_lawn_tennyson": {
+        name: "Cathy Lawn at Tennyson Ave.",
+        coords: [40.445580, -79.952988],
+        audios: [
+          { title: "Traffic Light Beep", file: "audio/traffic.mp3", date: "2025-09-10", timeOfDay: "morning", tag: "incident", description: "Accessibility crosswalk beep." },
+          { title: "Car Horns", file: "audio/horns.mp3", date: "2025-09-11", timeOfDay: "midnight", tag: "incident", description: "Loud horns at busy intersection." }
+        ]
+      },
+      "5th_bellefield": {
+        name: "5th + Bellefield",
+        coords: [40.446503, -79.951908],
+        audios: [
+          { title: "Traffic Light Beep", file: "audio/traffic.mp3", date: "2025-09-10", timeOfDay: "morning", tag: "incident", description: "Accessibility crosswalk beep." },
+          { title: "Car Horns", file: "audio/horns.mp3", date: "2025-09-11", timeOfDay: "midnight", tag: "incident", description: "Loud horns at busy intersection." }
+        ]
+      },
+      "chapel_lawn": {
+        name: "Between Cathedral Lawn and Heinz Memorial Chapel",
+        coords: [40.444835, -79.951968],
+        audios: [
+          { title: "Traffic Light Beep", file: "audio/traffic.mp3", date: "2025-09-10", timeOfDay: "morning", tag: "incident", description: "Accessibility crosswalk beep." },
+          { title: "Car Horns", file: "audio/horns.mp3", date: "2025-09-11", timeOfDay: "midnight", tag: "incident", description: "Loud horns at busy intersection." }
+        ]
+      },
+      "5th_bigelow": {
+        name: "5th + Bigelow",
+        coords: [40.444223, -79.954755],
+        audios: [
+          { title: "Traffic Light Beep", file: "audio/traffic.mp3", date: "2025-09-10", timeOfDay: "morning", tag: "incident", description: "Accessibility crosswalk beep." },
+          { title: "Car Horns", file: "audio/horns.mp3", date: "2025-09-11", timeOfDay: "midnight", tag: "incident", description: "Loud horns at busy intersection." }
+        ]
+      },
+      "wpu_front": {
+        name: "William Pitt Union",
+        coords: [40.443600, -79.954842],
+        audios: [
+          { title: "Traffic Light Beep", file: "audio/traffic.mp3", date: "2025-09-10", timeOfDay: "morning", tag: "incident", description: "Accessibility crosswalk beep." },
+          { title: "Car Horns", file: "audio/horns.mp3", date: "2025-09-11", timeOfDay: "midnight", tag: "incident", description: "Loud horns at busy intersection." }
+        ]
+      },
+      "SaSLawn": {
+        name: "Soldiers and Sailors Lawn",
+        coords: [40.444779, -79.956066],
+        audios: [
+          { title: "Traffic Light Beep", file: "audio/traffic.mp3", date: "2025-09-10", timeOfDay: "morning", tag: "incident", description: "Accessibility crosswalk beep." },
+          { title: "Car Horns", file: "audio/horns.mp3", date: "2025-09-11", timeOfDay: "midnight", tag: "incident", description: "Loud horns at busy intersection." }
+        ]
+      },
+      "quad": {
+        name: "Quad",
+        coords: [40.443185, -79.955751],
+        audios: [
+          { title: "Traffic Light Beep", file: "audio/traffic.mp3", date: "2025-09-10", timeOfDay: "morning", tag: "incident", description: "Accessibility crosswalk beep." },
+          { title: "Car Horns", file: "audio/horns.mp3", date: "2025-09-11", timeOfDay: "midnight", tag: "incident", description: "Loud horns at busy intersection." }
+        ]
+      },
+      "ohara_bigelow": {
+        name: "O'Hara + Bigelow",
+        coords: [40.445707, -79.956376],
+        audios: [
+          { title: "Traffic Light Beep", file: "audio/traffic.mp3", date: "2025-09-10", timeOfDay: "morning", tag: "incident", description: "Accessibility crosswalk beep." },
+          { title: "Car Horns", file: "audio/horns.mp3", date: "2025-09-11", timeOfDay: "midnight", tag: "incident", description: "Loud horns at busy intersection." }
+        ]
+      },
+      "tower_lobby": {
+        name: "Towers Lobby",
+        coords: [40.44284, -79.95641],
+        audios: [
+          { title: "Traffic Light Beep", file: "audio/traffic.mp3", date: "2025-09-10", timeOfDay: "morning", tag: "incident", description: "Accessibility crosswalk beep." },
+          { title: "Car Horns", file: "audio/horns.mp3", date: "2025-09-11", timeOfDay: "midnight", tag: "incident", description: "Loud horns at busy intersection." }
+        ]
+      },
+      "forbes_lawrence": {
+        name: "Forbes + Lawrence Hall",
+        coords: [40.442719, -79.955239],
+        audios: [
+          { title: "Traffic Light Beep", file: "audio/traffic.mp3", date: "2025-09-10", timeOfDay: "morning", tag: "incident", description: "Accessibility crosswalk beep." },
+          { title: "Car Horns", file: "audio/horns.mp3", date: "2025-09-11", timeOfDay: "midnight", tag: "incident", description: "Loud horns at busy intersection." }
+        ]
+      },
+      "hillman": {
+        name: "Hillman",
+        coords: [40.44244, -79.95396],
+        audios: [
+          { title: "Traffic Light Beep", file: "audio/traffic.mp3", date: "2025-09-10", timeOfDay: "morning", tag: "incident", description: "Accessibility crosswalk beep." },
+          { title: "Car Horns", file: "audio/horns.mp3", date: "2025-09-11", timeOfDay: "midnight", tag: "incident", description: "Loud horns at busy intersection." }
+        ]
+      },
+      "posvar_passage": {
+        name: "Posvar Passage between Lawrence and Posvar",
+        coords: [40.441707, -79.954998],
+        audios: [
+          { title: "Traffic Light Beep", file: "audio/traffic.mp3", date: "2025-09-10", timeOfDay: "morning", tag: "incident", description: "Accessibility crosswalk beep." },
+          { title: "Car Horns", file: "audio/horns.mp3", date: "2025-09-11", timeOfDay: "midnight", tag: "incident", description: "Loud horns at busy intersection." }
+        ]
+      },
+      "posvar": {
+        name: "W. W. Posvar Hall",
+        coords: [40.441426, -79.953868],
+        audios: [
+          { title: "Traffic Light Beep", file: "audio/traffic.mp3", date: "2025-09-10", timeOfDay: "morning", tag: "incident", description: "Accessibility crosswalk beep." },
+          { title: "Car Horns", file: "audio/horns.mp3", date: "2025-09-11", timeOfDay: "midnight", tag: "incident", description: "Loud horns at busy intersection." }
+        ]
+      },
+      "forbes_bouquet": {
+        name: "Forbes + Bouquet",
+        coords: [40.441953, -79.956440],
+        audios: [
+          { title: "Traffic Light Beep", file: "audio/traffic.mp3", date: "2025-09-10", timeOfDay: "morning", tag: "incident", description: "Accessibility crosswalk beep." },
+          { title: "Car Horns", file: "audio/horns.mp3", date: "2025-09-11", timeOfDay: "midnight", tag: "incident", description: "Loud horns at busy intersection." }
+        ]
+      },
+      "forbes_oakland": {
+        name: "Forbes + Oakland",
+        coords: [40.441566, -79.956975],
+        audios: [
+          { title: "Traffic Light Beep", file: "audio/traffic.mp3", date: "2025-09-10", timeOfDay: "morning", tag: "incident", description: "Accessibility crosswalk beep." },
+          { title: "Car Horns", file: "audio/horns.mp3", date: "2025-09-11", timeOfDay: "midnight", tag: "incident", description: "Loud horns at busy intersection." }
+        ]
+      },
+      "forbes_atwood": {
+        name: "Forbes + Atwood",
+        coords: [40.441082, -79.957624],
+        audios: [
+          { title: "Traffic Light Beep", file: "audio/traffic.mp3", date: "2025-09-10", timeOfDay: "morning", tag: "incident", description: "Accessibility crosswalk beep." },
+          { title: "Car Horns", file: "audio/horns.mp3", date: "2025-09-11", timeOfDay: "midnight", tag: "incident", description: "Loud horns at busy intersection." }
+        ]
+      },
+      "thackeray_5th": {
+        name: "Thackeray + 5th",
+        coords: [40.443319, -79.956760],
+        audios: [
+          { title: "Traffic Light Beep", file: "audio/traffic.mp3", date: "2025-09-10", timeOfDay: "morning", tag: "incident", description: "Accessibility crosswalk beep." },
+          { title: "Car Horns", file: "audio/horns.mp3", date: "2025-09-11", timeOfDay: "midnight", tag: "incident", description: "Loud horns at busy intersection." }
+        ]
+      },
+      "benedum": {
+        name: "Benedum Hall",
+        coords: [40.44407, -79.95799],
+        audios: [
+          { title: "Traffic Light Beep", file: "audio/traffic.mp3", date: "2025-09-10", timeOfDay: "morning", tag: "incident", description: "Accessibility crosswalk beep." },
+          { title: "Car Horns", file: "audio/horns.mp3", date: "2025-09-11", timeOfDay: "midnight", tag: "incident", description: "Loud horns at busy intersection." }
+        ]
+      },
+      "ohara_univ": {
+        name: "O'Hara + University",
+        coords: [40.445087, -79.957296],
+        audios: [
+          { title: "Traffic Light Beep", file: "audio/traffic.mp3", date: "2025-09-10", timeOfDay: "morning", tag: "incident", description: "Accessibility crosswalk beep." },
+          { title: "Car Horns", file: "audio/horns.mp3", date: "2025-09-11", timeOfDay: "midnight", tag: "incident", description: "Loud horns at busy intersection." }
+        ]
+      },
+      "petes": {
+        name: "Petersen Events Center",
+        coords: [40.44411, -79.96226],
+        audios: [
+          { title: "Traffic Light Beep", file: "audio/traffic.mp3", date: "2025-09-10", timeOfDay: "morning", tag: "incident", description: "Accessibility crosswalk beep." },
+          { title: "Car Horns", file: "audio/horns.mp3", date: "2025-09-11", timeOfDay: "midnight", tag: "incident", description: "Loud horns at busy intersection." }
+        ]
+      },
+      "crab_tree": {
+        name: "Crabtree Hall",
+        coords: [40.443064, -79.959360],
+        audios: [
+          { title: "Traffic Light Beep", file: "audio/traffic.mp3", date: "2025-09-10", timeOfDay: "morning", tag: "incident", description: "Accessibility crosswalk beep." },
+          { title: "Car Horns", file: "audio/horns.mp3", date: "2025-09-11", timeOfDay: "midnight", tag: "incident", description: "Loud horns at busy intersection." }
+        ]
+      },
+      "5th_atwood": {
+        name: "Crabtree Hall",
+        coords: [40.441753, -79.958606],
+        audios: [
+          { title: "Traffic Light Beep", file: "audio/traffic.mp3", date: "2025-09-10", timeOfDay: "morning", tag: "incident", description: "Accessibility crosswalk beep." },
+          { title: "Car Horns", file: "audio/horns.mp3", date: "2025-09-11", timeOfDay: "midnight", tag: "incident", description: "Loud horns at busy intersection." }
+        ]
+      },
+      "lothrop": {
+        name: "Lothrop St.",
+        coords: [40.441620, -79.960325],
+        audios: [
+          { title: "Traffic Light Beep", file: "audio/traffic.mp3", date: "2025-09-10", timeOfDay: "morning", tag: "incident", description: "Accessibility crosswalk beep." },
+          { title: "Car Horns", file: "audio/horns.mp3", date: "2025-09-11", timeOfDay: "midnight", tag: "incident", description: "Loud horns at busy intersection." }
+        ]
+      },
+      "sutherland": {
+        name: "Sutherland Hall",
+        coords: [40.44598, -79.96265],
+        audios: [
+          { title: "Traffic Light Beep", file: "audio/traffic.mp3", date: "2025-09-10", timeOfDay: "morning", tag: "incident", description: "Accessibility crosswalk beep." },
+          { title: "Car Horns", file: "audio/horns.mp3", date: "2025-09-11", timeOfDay: "midnight", tag: "incident", description: "Loud horns at busy intersection." }
+        ]
+      },
+      "bigelow_bigelow": {
+        name: "Bigelow + Bigelow",
+        coords: [40.447601, -79.953809],
+        audios: [
+          { title: "Traffic Light Beep", file: "audio/traffic.mp3", date: "2025-09-10", timeOfDay: "morning", tag: "incident", description: "Accessibility crosswalk beep." },
+          { title: "Car Horns", file: "audio/horns.mp3", date: "2025-09-11", timeOfDay: "midnight", tag: "incident", description: "Loud horns at busy intersection." }
+        ]
+      },
+    };
+
+    function getMimeType(file) {
+      if (file.endsWith(".mp3")) return "audio/mpeg";
+      if (file.endsWith(".m4a")) return "audio/mp4";
+      if (file.endsWith(".wav")) return "audio/wav";
+      if (file.endsWith(".ogg")) return "audio/ogg";
+      return "audio/mpeg"; // fallback
+    }
+
+    function buildPopup(place) {
+      let html = `<b>${place.name}</b><br>`;
+      place.audios.forEach(a => {
+        const mime = getMimeType(a.file);
+        html += `
+          <div class="popup-audio">
+            <strong>${a.title}</strong><br>
+            <audio controls controlsList="nodownload">
+              <source src="${a.file}" type="${mime}">
+              Your browser does not support audio.
+            </audio>
+            <div class="popup-meta">
+              <em>${a.date}, ${a.timeOfDay}</em><br>
+              <span>Tag: ${a.tag}</span><br>
+              <span>${a.description}</span>
+            </div>
+          </div>
+        `;
+      });
+
+    html += `
+      <div style="margin-top:10px;">
+        <button onclick="uploadSound('${place.name}')">Upload Sound</button>
+      </div>
+      `;
+      return html;
+    }
+
+
+    // Create markers with audio popups
+    Object.values(placeData).forEach(place => {
+      var marker = L.marker(place.coords).addTo(map);
+      marker.bindPopup(buildPopup(place));
+    });
+
+    // Dummy button actions
+    function uploadSound(placeName) {
+      // alert("Upload sound feature coming soon!");
+      window.location.href = "upload.html?place=" + encodeURIComponent(placeName);
+    }
+
+    function login() {
+      window.location.href = "login.html";
+    }
+  </script>
+</body>
+</html>
