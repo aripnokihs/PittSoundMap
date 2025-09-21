@@ -56,54 +56,62 @@
 <body>
         <div class="login-box">
             <h1 style="text-align: center"> Sign Up to Pitt Sound Map </h1>
-            <form id="login" action="v1/users/add" method="post">
+            <form id="signup-form" action="v1/users/add" method="post">
                 <!--Username-->
                 <label for="username" style="padding: 10px" ><b> Username:</b></label>
                 <input type = "text" placeholder="Enter Username" name = "username">
                 
                 <!--Password-->
-                <label for="password" style="padding: 10px;"><b>Password:</b></label> 
-                <input type = "password" id="password" name="password" placeholder="Enter Password" password = "password"> 
-                <label for="password" style="padding: 10px;"><b>Verify Password:</b></label> 
-                <input type = "password" id="verify-password" name="verify-password" placeholder="Enter Password" password = "password"> 
+                <label for="password"><b>Password:</b></label> 
+                <input type="password" id="password" name="password" placeholder="Enter Password">
+
+                <label for="confirm-password"><b>Verify Password:</b></label> 
+                <input type="password" id="confirm-password" name="confirm_password" placeholder="Re-enter Password">
+                <div id="error-message" style="display:none;color:red;">Passwords do not match.</div>
+                <div id="okay-message" style="display: none;color: green;">OK</div>
+
                 <button type="submit">Sign Up</button>
                 <button type="button" onclick="cancel()"> Cancel </button>
             </form>
         </div>
     </div>
     
-    <script>
-        const passwordInput = document.getElementById("password");
-        const verifyPasswordInput = document.getElementById("verify-password");
-        function validatePasswords() {
-            if (passwordInput.value !== verifyPasswordInput.value) {
-                errorMessage.style.display = "block"; // Show the error message
-                return false; // Indicate validation failed
-            } else {
-                errorMessage.style.display = "none"; // Hide the error message
-                return true; // Indicate validation passed
-            }
-        }
+ <script>
+  const form = document.getElementById("signup-form");
+  const passwordInput = document.getElementById("password");
+  const confirmPasswordInput = document.getElementById("confirm-password");
+  const errorMessage = document.getElementById("error-message");
+  const okayMessage = document.getElementById("okay-message");
 
-        const form = document.getElementById("signup-form");
-        form.addEventListener("submit", async(event) => {
-        event.preventDefault();
-         const passwordValid = validatePasswords();
-            if(!passwordValid){
-                return;
-            }
-       const username = form.elements["username"].value;
-       const password = form.elements["password"].value;
-
-
-
-    });
-       
-    function cancel(){
-        window.location.href ="/login"
+  function validatePasswords() {
+    const match = passwordInput.value === confirmPasswordInput.value;
+    if (!match) {
+      errorMessage.style.display = "block";
+      okayMessage.style.display = "none";
+    } else {
+      errorMessage.style.display = "none";
+      okayMessage.style.display = "block";
     }
-    
-    </script>
+    return match;
+  }
+
+  // Check as user types
+  passwordInput.addEventListener("input", validatePasswords);
+  confirmPasswordInput.addEventListener("input", validatePasswords);
+
+  // Final gate on submit
+  form.addEventListener("submit", (event) => {
+    if (!validatePasswords()) {
+      event.preventDefault(); // Stop form submit
+      alert("Passwords do not match!"); // Optional feedback
+    }
+  });
+
+  function cancel() {
+    window.location.href = "/login";
+  }
+</script>
+
 
 </body>
 </html>
