@@ -491,7 +491,7 @@
       // fetching data for each pin
       async function fetchAudios(place) {
         try {
-            const res = await fetch(`/v1/audio/place/${encodeURIComponent(place)}`);
+            const res = await fetch(`/v1/audios/${encodeURIComponent(place)}`);
             const data = await res.json();
             if (data.error) {
                 console.error("Error fetching audios:", data.error);
@@ -504,18 +504,18 @@
         }
       }
       // refresh button
-html += `
-  <div style="margin-top:10px; display:flex; justify-content:space-between; align-items:center;">
-    ${
-      isLoggedIn
-        ? `<button class="upload-btn" data-place="${place.name}">Upload Sound</button>`
-        : `<button disabled title="Login required">Upload Sound (Login first)</button>`
-    }
-    <button class="refresh-btn" data-place="${place.name}">Refresh</button>
-  </div>
-`;
-return html;
-    }
+// html += `
+//   <div style="margin-top:10px; display:flex; justify-content:space-between; align-items:center;">
+//     ${
+//       isLoggedIn
+//         ? `<button class="upload-btn" data-place="${place.name}">Upload Sound</button>`
+//         : `<button disabled title="Login required">Upload Sound (Login first)</button>`
+//     }
+//     <button class="refresh-btn" data-place="${place.name}">Refresh</button>
+//   </div>
+// `;
+// return html;
+//     }
 
 function renderAudios(container, audios, activeTags) {
   const filtered = audios.filter(a => activeTags.includes(a.tag));
