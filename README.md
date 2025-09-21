@@ -54,34 +54,6 @@ pip install -r requirements.txt
 uvicorn main:app --reload
 ```
 
-### Database Setup
-
-```sql
-CREATE DATABASE pitt_soundmap;
-
--- Example table
-CREATE TABLE sounds (
-  id SERIAL PRIMARY KEY,
-  title TEXT NOT NULL,
-  file_url TEXT NOT NULL,
-  date DATE,
-  time_of_day TEXT,
-  tag TEXT,
-  description TEXT,
-  latitude FLOAT,
-  longitude FLOAT
-);
-```
-
-### Frontend Setup
-
-```bash
-cd pitt-sound-map/frontend
-# Serve locally (example with Python)
-python3 -m http.server 8080
-```
-
-Visit: [http://localhost:8080/index.html](http://localhost:8080/index.html)
 
 ## 📊 Accessibility Use Cases
 
