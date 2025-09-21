@@ -100,7 +100,7 @@ async def upload_audio(
                        (title, location, description, tags, date, time_of_day, file_path, file_type)
                        VALUES (%s,%s,%s,%s,%s,%s,%s,%s)
                        RETURNING id""",
-                    (title, place, description, tags, date, timeOfDay, file_name, file_type)
+                    (title, place, description, tags, date, timeOfDay, file_path, file_type)
                 )
                 audio_id = cur.fetchone()[0]
                 conn.commit()

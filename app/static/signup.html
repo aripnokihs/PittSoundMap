@@ -63,9 +63,9 @@
                 
                 <!--Password-->
                 <label for="password" style="padding: 10px;"><b>Password:</b></label> 
-                <input type = "password" name="password" placeholder="Enter Password" password = "password"> 
+                <input type = "password" id="password" name="password" placeholder="Enter Password" password = "password"> 
                 <label for="password" style="padding: 10px;"><b>Verify Password:</b></label> 
-                <input type = "password" name="password" placeholder="Enter Password" password = "password"> 
+                <input type = "password" id="verify-password" name="verify-password" placeholder="Enter Password" password = "password"> 
                 <button type="submit">Sign Up</button>
                 <button type="button" onclick="cancel()"> Cancel </button>
             </form>
@@ -73,6 +73,8 @@
     </div>
     
     <script>
+        const passwordInput = document.getElementById("password");
+        const verifyPasswordInput = document.getElementById("verify-password");
         function validatePasswords() {
             if (passwordInput.value !== verifyPasswordInput.value) {
                 errorMessage.style.display = "block"; // Show the error message

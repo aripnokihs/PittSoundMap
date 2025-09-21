@@ -282,13 +282,13 @@
     function playAudio(filePath) {
       const player = document.getElementById("audio-player");
 
-      // Replace every instance of this string (not good practice and should be fixed)
-      filePath = filePath.replace("/v1/audios/", "");
+      // Replace backslashes with forward slashes
+      filePath = filePath.replace(/\\/g, "/");
 
       // Ensure leading slash
       if (!filePath.startsWith("/")) filePath = "/" + filePath;
 
-      const url = "/v1/audios/" + filePath;
+      const url = "/v1/audios" + filePath;
 
       if (player.src !== url) {
         player.src = url;
