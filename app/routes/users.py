@@ -4,8 +4,19 @@ from fastapi.responses import RedirectResponse
 import psycopg
 from psycopg.rows import dict_row
 from passlib.hash import bcrypt
+from fastapi import APIRouter, Form, Response, Request
+from fastapi.responses import JSONResponse
+from passlib.context import CryptContext
+from itsdangerous import URLSafeSerializer
 
 router = APIRouter()
+
+# ✅ Password hasher
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+# ✅ Secret key for cookie signing
+SECRET_KEY = os.getenv("SECRET_KEY", "super-secret")
+serializer = URLSafeSerializer(SECRET_KEY, salt="session")
 
 # Connection info
 conninfo = (
@@ -63,3 +74,51 @@ async def get_user(username: str = Form(...), password: str = Form(...)):
 
     except Exception as e:
         return {"status": "error", "message": str(e)}
+
+@router.post("/login")
+async def login_user(
+    username: str = Form(...),
+    password: str = Form(...),
+    response: Response = None
+):
+    try:
+        with psycopg.connect(conninfo, row_factory=dict_row) as conn:
+            with conn.cursor() as cur:
+                cur.execute("SELECT username, password_hash FROM users WHERE username = %s", (username,))
+                user = cur.fetchone()
+
+        if not user or not pwd_context.verify(password, user["password_hash"]):
+            return JSONResponse({"status": "error", "message": "Invalid credentials"}, status_code=401)
+
+        # Create signed cookie
+        session_token = serializer.dumps({"username": username})
+        response.set_cookie(
+            key="session",
+            value=session_token,
+            httponly=True,  # protects from JavaScript access
+            samesite="lax",
+        )
+
+        return {"status": "success", "user": username}
+    except Exception as e:
+        return {"status": "error", "message": str(e)}
+
+
+@router.get("/session")
+async def get_session(request: Request):
+    """Check session cookie and return current user if valid"""
+    token = request.cookies.get("session")
+    if not token:
+        return {"user": None}
+
+    try:
+        data = serializer.loads(token)
+        return {"user": data["username"]}
+    except Exception:
+        return {"user": None}
+
+
+@router.post("/logout")
+async def logout(response: Response):
+    response.delete_cookie("session")
+    return {"status": "success", "message": "Logged out"}

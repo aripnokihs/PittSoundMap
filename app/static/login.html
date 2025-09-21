@@ -82,6 +82,31 @@
     </div>
 
 <script>
+const form = document.getElementById("login-form");
+form.addEventListener("submit", async (event) => {
+  event.preventDefault();
+
+  const username = form.elements["username"].value;
+  const password = form.elements["password"].value;
+
+  try {
+    const response = await fetch("/v1/users/login", {
+      method: "POST",
+      body: new URLSearchParams({ username, password }),
+      headers: { "Content-Type": "application/x-www-form-urlencoded" }
+    });
+
+    const data = await response.json();
+    if (response.ok && data.status === "success") {
+      window.location.href = "/";  // go back to map
+    } else {
+      alert("Login failed: " + data.message);
+    }
+  } catch (err) {
+    console.error(err);
+    alert("An error occurred.");
+  }
+});
 function cancel() {
     window.location.href = "/";
 }

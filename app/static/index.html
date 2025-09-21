@@ -399,11 +399,17 @@
       return html;
     }
 
-
-    // Create markers with audio popups
+    // Create markers, update popup dynamically on open
     Object.values(placeData).forEach(place => {
       var marker = L.marker(place.coords).addTo(map);
-      marker.bindPopup(buildPopup(place));
+
+      // attach an empty popup (required for click-to-open)
+      marker.bindPopup("");
+
+      // when popup opens, rebuild its content based on login status
+      marker.on("popupopen", function (e) {
+        e.popup.setContent(buildPopup(place));
+      });
     });
 
     // Dummy button actions
@@ -434,11 +440,35 @@
     //   });
     // }
 
-    function logout() {
-      isLoggedIn = false;  // 🔹 update modifier
+    async function checkSession() {
+  try {
+    const res = await fetch("/v1/users/session");
+    const data = await res.json();
+    if (data.user) {
+      isLoggedIn = true;
+      currentUser = data.user;
+    } else {
+      isLoggedIn = false;
+      currentUser = null;
+    }
+    renderStatus();
+  } catch (err) {
+    console.error("Failed to fetch session:", err);
+  }
+}
+
+function logout() {
+  fetch("/v1/users/logout", { method: "POST" })
+    .then(() => {
+      isLoggedIn = false;
       currentUser = null;
       renderStatus();
-    }
+    });
+}
+
+// existing renderStatus() stays the same...
+// just call checkSession() on page load
+checkSession();
 
     // =====================================
     // Init
