@@ -56,6 +56,19 @@
     .leaflet-popup-content {
       width: 450px !important;
     }
+    .header-btn {
+      background: #FFB81C; /* Pitt gold */
+      border: none;
+      border-radius: 6px;
+      padding: 6px 12px;
+      font-weight: bold;
+      cursor: pointer;
+      margin-left: 8px;
+    }
+    .header-btn:hover {
+      background: white;
+      color: #003594; /* Pitt blue */
+    }
   </style>
 </head>
 <body>
@@ -93,28 +106,39 @@
     //  Render status UI based on modifier
     // =====================================
     function renderStatus() {
-      const container = document.getElementById("status-container");
-      container.innerHTML = ""; // clear
+  const container = document.getElementById("status-container");
+  container.innerHTML = "";
 
-      if (isLoggedIn) {
-        const welcome = document.createElement("span");
-        welcome.textContent = "✅ Logged in as " + currentUser;
-        welcome.style.marginRight = "10px";
-        welcome.style.fontWeight = "bold";
+  if (isLoggedIn) {
+    const welcome = document.createElement("span");
+    welcome.textContent = currentUser;
+    welcome.style.marginRight = "10px";
+    welcome.style.fontWeight = "bold";
 
-        const logoutBtn = document.createElement("button");
-        logoutBtn.textContent = "Logout";
-        logoutBtn.onclick = logout;
+    container.appendChild(welcome);
 
-        container.appendChild(welcome);
-        container.appendChild(logoutBtn);
-      } else {
-        const loginBtn = document.createElement("button");
-        loginBtn.textContent = "Login";
-        loginBtn.onclick = login;
-        container.appendChild(loginBtn);
-      }
+    // Admin Dashboard button only for admin
+    if (currentUser === "admin") {
+      const adminBtn = document.createElement("button");
+      adminBtn.textContent = "Admin Dashboard";
+      adminBtn.onclick = () => {
+        window.location.href = "/admin";
+      };
+      container.appendChild(adminBtn);
     }
+
+    const logoutBtn = document.createElement("button");
+    logoutBtn.textContent = "Logout";
+    logoutBtn.onclick = logout;
+    container.appendChild(logoutBtn);
+  } else {
+    const loginBtn = document.createElement("button");
+    loginBtn.textContent = "Login";
+    loginBtn.onclick = login;
+    container.appendChild(loginBtn);
+  }
+}
+
     // Initialize map centered on University of Pittsburgh
     var map = L.map('map').setView([40.444, -79.960], 15);
 

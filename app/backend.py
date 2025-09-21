@@ -39,3 +39,7 @@ def read_signup():
 @app.get("/upload")
 def read_upload():
     return FileResponse(os.path.join(STATIC_DIR, "upload.html"))
+
+@app.get("/admin")
+def read_admin():
+    return FileResponse(os.path.join(STATIC_DIR, "admin.html"))
