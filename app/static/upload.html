@@ -200,7 +200,7 @@ form.addEventListener("submit", async function (e) {
         if (response.ok) {
             alert("Upload successful! Audio ID: " + result.audio_id);
             // Optional: redirect after success
-            // window.location.href = "/"; 
+            window.location.href = "/"; 
         } else {
             alert("Upload failed: " + result.message);
         }
