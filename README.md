@@ -1,9 +1,6 @@
 # 🗺️ Pitt Map of Sounds
 ### For SteelHacks XII
 
-![Project Banner Placeholder](/assets/banner.png)
-*(Insert a banner image of the Pitt campus or your project logo here)*
-
 ## 🌟 Overview
 
 The Pitt Map of Sounds is an interactive platform that enhances **accessibility on campus** while also helping **alumni reconnect with familiar places** through sound.
