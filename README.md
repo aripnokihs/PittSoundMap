@@ -73,8 +73,8 @@ uvicorn main:app --reload
 
 ## 👥 Team
 
-* \[Your Names Here]
-* Hackathon project, \[Hackathon Name] 2025
+* Max Wong, Brandon Yang, Yifei Tian, Kevin Li
+* Pitt Map of Sounds, Steelhacks, 2025
 
 ## 📜 License
 
