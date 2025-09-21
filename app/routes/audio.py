@@ -4,6 +4,7 @@ from app.db import pool
 import psycopg
 from psycopg.rows import dict_row
 import shutil
+import time
 
 router = APIRouter()
 
@@ -35,7 +36,12 @@ async def upload_audio(
     
     if not audioFile.content_type.startswith("audio/"):
         raise HTTPException(status_code=400, detail="File must be an audio type")
-    file_path = os.path.join(UPLOAD_DIR, audioFile.filename)
+    
+
+    # Generate unique filename with timestamp
+    timestamp = int(time.time())
+    unique_filename = f"{timestamp}_{audioFile.filename}"
+    file_path = os.path.join(UPLOAD_DIR, unique_filename)
     
     # File type / extension
     _, file_type = os.path.splitext(audioFile.filename)
