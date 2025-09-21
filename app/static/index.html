@@ -404,62 +404,47 @@
       return "audio/mpeg"; // fallback
     }
 
-    // function buildPopup(place) {
-    //   let html = `<b>${place.name}</b><br>`;
-    //   place.audios.forEach(a => {
-    //     const mime = getMimeType(a.file);
-    //     html += `
-    //       <div class="popup-audio">
-    //         <strong>${a.title}</strong><br>
-    //         <audio controls controlsList="nodownload">
-    //           <source src="${a.file}" type="${mime}">
-    //           Your browser does not support audio.
-    //         </audio>
-    //         <div class="popup-meta">
-    //           <em>${a.date}, ${a.timeOfDay}</em><br>
-    //           <span>Tag: ${a.tag}</span><br>
-    //           <span>${a.description}</span>
-    //         </div>
-    //       </div>
-    //     `;
-    //   });
-    async function buildPopup(placeName) {
-      let html = `<b>${placeName}</b><br>`;
-      let audios = await fetchAudios(placeName);
-      html += `
-        <div class="popup-filters">
-          <label><input type="checkbox" class="tag-filter" value="daily" checked> Daily</label>
-          <label><input type="checkbox" class="tag-filter" value="event" checked> Event</label>
-          <label><input type="checkbox" class="tag-filter" value="incident" checked> Incident</label>
-        </div>
-        <div class="popup-audios"></div>
-      `;
+    
+async function buildPopup(placeName) {
+  let html = `
+    <b>${placeName}</b><br>
+    <div class="popup-filters">
+      <label><input type="checkbox" class="tag-filter" value="daily" checked> Daily</label>
+      <label><input type="checkbox" class="tag-filter" value="event" checked> Event</label>
+      <label><input type="checkbox" class="tag-filter" value="incident" checked> Incident</label>
+    </div>
+    <div class="popup-audios"><em>Loading audios...</em></div>
 
-      html += renderAudioList(audios);
+    <!-- Buttons row -->
+    <div style="margin-top:10px; display:flex; justify-content:space-between; align-items:center;">
+      ${
+        isLoggedIn
+          ? `<button onclick="uploadSound('${placeName}')">Upload Sound</button>`
+          : `<button disabled title="Login required">Upload Sound (Login first)</button>`
+      }
+      <button onclick="refreshAudios('${placeName}', this)">Refresh</button>
+    </div>
+  `;
 
-      html += `</div>`; // close audio-list div
+  return html;
+}
 
-      // Upload / refresh buttons
-      html += isLoggedIn
-        ? `<div style="margin-top:10px; display:flex; gap:10px;">
-        <button onclick="uploadSound('${placeName}')">Upload Sound</button>
-        <button onclick="refreshAudios('${placeName}', this)">Refresh Audio</button>
-       </div>`
-        : `<div style="margin-top:10px; display:flex; gap:10px;">
-        <button disabled title="Login required">Upload Sound (Login first)</button>
-        <button onclick="refreshAudios('${placeName}', this)">Refresh Audio</button>
-       </div>`;
 
-      return html;
-    }
 
-    function renderAudioList(audios, filterTag = "all") {
-      let html = "";
-      audios
-        .filter(a => filterTag === "all" || a.tags === filterTag)
-        .forEach(a => {
-          const mime = getMimeType(a.file_path);
-          html += `
+// Render audio list with filters + randomize (max 3)
+function renderAudioList(audios, activeTags) {
+  const filtered = audios.filter(a => activeTags.includes(a.tags));
+  if (filtered.length === 0) {
+    return `<em>No audios match selected tags.</em>`;
+  }
+
+  const shuffled = [...filtered].sort(() => 0.5 - Math.random());
+  const limited = shuffled.slice(0, 3);
+
+  return limited
+    .map(a => {
+      const mime = getMimeType(a.file_path);
+      return `
         <div class="popup-audio">
           <strong>${a.title}</strong><br>
           <audio controls controlsList="nodownload">
@@ -473,9 +458,45 @@
           </div>
         </div>
       `;
-        });
-      return html || "<em>No audio for this tag.</em>";
-    }
+    })
+    .join("");
+}
+
+
+// Refresh popup content
+async function refreshAudios(placeName, buttonEl) {
+  const popup = buttonEl.closest(".leaflet-popup-content");
+  const audioContainer = popup.querySelector(".popup-audios");
+
+  let audios = await fetchAudios(placeName);
+
+  // Find checked filters in this popup
+  const activeTags = [...popup.querySelectorAll(".tag-filter:checked")].map(
+    cb => cb.value
+  );
+
+  audioContainer.innerHTML = renderAudioList(audios, activeTags);
+}
+
+
+
+// Hook up filters after popup opens
+function setupPopupInteractivity(popupEl, placeName, audios) {
+  const audioContainer = popupEl.querySelector(".popup-audios");
+
+  // Initial render
+  const activeTags = [...popupEl.querySelectorAll(".tag-filter:checked")].map(cb => cb.value);
+  audioContainer.innerHTML = renderAudioList(audios, activeTags);
+
+  // Listen for filter changes
+  popupEl.querySelectorAll(".tag-filter").forEach(cb => {
+    cb.addEventListener("change", () => {
+      const active = [...popupEl.querySelectorAll(".tag-filter:checked")].map(cb => cb.value);
+      audioContainer.innerHTML = renderAudioList(audios, active);
+    });
+  });
+}
+
 
     function filterAudios(placeName, selectEl) {
       const selectedTag = selectEl.value;
@@ -580,19 +601,22 @@ function renderAudios(container, audios, activeTags) {
     // });
 
 
-    Object.entries(placeData).forEach(([key, place]) => {
-      const marker = L.marker(place.coords).addTo(map);
+ Object.entries(placeData).forEach(([key, place]) => {
+  const marker = L.marker(place.coords).addTo(map);
 
-      // Bind placeholder
-      marker.bindPopup("Loading...");
+  // Pre-bind placeholder
+  marker.bindPopup("Loading...");
 
-      // When popup opens, fetch & replace content
-      marker.on("popupopen", async function (e) {
-        console.log("Popup opened for:", place.name);
-        const content = await buildPopup(place.name);
-        e.popup.setContent(content);
-      });
-    });
+  marker.on("popupopen", async function (e) {
+    const content = await buildPopup(place.name);
+    e.popup.setContent(content);
+
+    // After injecting content, fetch audios + activate filters
+    const popupEl = e.popup.getElement().querySelector(".leaflet-popup-content");
+    const audios = await fetchAudios(place.name);
+    setupPopupInteractivity(popupEl, place.name, audios);
+  });
+});
     // Dummy button actions
     function uploadSound(placeName) {
       // alert("Upload sound feature coming soon!");
