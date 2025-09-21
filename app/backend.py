@@ -18,12 +18,23 @@ app = FastAPI()
 app.include_router(health.router, prefix=f"{API_VERSION}/health", tags=["Health"])
 app.include_router(users.router, prefix=f"{API_VERSION}/users", tags=["Users"])
 
-app.mount("/static", StaticFiles(directory=os.path.join(os.path.dirname(__file__), "static")), name="static")
+# Static directory path
+STATIC_DIR = os.path.join(os.path.dirname(__file__), "static")
+app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 
+# Page routes
 @app.get("/")
 def read_index():
-    return FileResponse(os.path.join(os.path.dirname(__file__), "static", "signup.html"))
+    return FileResponse(os.path.join(STATIC_DIR, "index.html"))
 
-@app.get("/index")
-def read_home():
-    return FileResponse(os.path.join(os.path.dirname(__file__), "static", "index.html"))
+@app.get("/login")
+def read_login():
+    return FileResponse(os.path.join(STATIC_DIR, "login.html"))
+
+@app.get("/signup")
+def read_signup():
+    return FileResponse(os.path.join(STATIC_DIR, "signup.html"))
+
+@app.get("/upload")
+def read_upload():
+    return FileResponse(os.path.join(STATIC_DIR, "upload.html"))
