@@ -61,46 +61,55 @@
 
 
 </style>
-
+</head>
 <body>
     <div class="login-box">
         <h1 style="text-align: center"> Login to Pitt Sound Map </h1>
-        <form id="login">
-        <!--Username-->
-        <label for="username" style="padding: 10px" ><b> Username:</b></label>
-        <input type = "text" placeholder="Enter Username" name = "username">
-        
-        <!--Password-->
-        <label for="password" style="padding: 10px;"><b>Password:</b></label> 
-        <input type = "password" placeholder="Enter Password" name = "password"> 
-        <button type="submit">Login</button>
-        <button type="button" onclick="cancel()"> Cancel </button>
-        
-        <a href="signup.html" class = "signup-link">New to Pitt Sound Map?</a>
+        <form id="login-form" action="/v1/users/get" method="post">
+            <!-- Username -->
+            <label for="username"><b>Username:</b></label>
+            <input type="text" name="username" placeholder="Enter Username" required>
+
+            <!-- Password -->
+            <label for="password"><b>Password:</b></label>
+            <input type="password" name="password" placeholder="Enter Password" required>
+
+            <button type="submit">Login</button>
+            <button type="button" onclick="cancel()">Cancel</button>
+
+            <a href="/signup" class="signup-link"><u>New to Pitt Sound Map?</u></a>
         </form>
     </div>
-    
-    <script>
-        const form = document.getElementById("login");
-       form.addEventListener("submit", async(event) => {
-        event.preventDefault();
 
-       const username = form.elements["username"].value;
-       const password = form.elements["password"].value;
+<script>
+const form = document.getElementById("login-form");
+form.addEventListener("submit", async (event) => {
+  event.preventDefault();
 
-        try{
-            response = await fetch()
-        }
-        catch{
+  const username = form.elements["username"].value;
+  const password = form.elements["password"].value;
 
-        }
-
-
+  try {
+    const response = await fetch("/v1/users/login", {
+      method: "POST",
+      body: new URLSearchParams({ username, password }),
+      headers: { "Content-Type": "application/x-www-form-urlencoded" }
     });
-    function cancel(){
-        window.location.href ="index.html"
-    }
-    </script>
 
+    const data = await response.json();
+    if (response.ok && data.status === "success") {
+      window.location.href = "/";  // go back to map
+    } else {
+      alert("Login failed: " + data.message);
+    }
+  } catch (err) {
+    console.error(err);
+    alert("An error occurred.");
+  }
+});
+function cancel() {
+    window.location.href = "/";
+}
+</script>
 </body>
 </html>

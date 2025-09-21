@@ -182,34 +182,40 @@
     </script> -->
 
     <script>
-        const form = document.getElementById("uploadForm");
+const form = document.getElementById("uploadForm");
 
-        form.addEventListener("submit", async function (e) {
-            e.preventDefault();
+form.addEventListener("submit", async function (e) {
+    e.preventDefault();
 
-            const formData = new FormData(form);
+    const formData = new FormData(form);
 
-            try {
-                const response = await fetch("http://localhost:8000/upload/", {
-                    method: "POST",
-                    body: formData
-                });
-
-                const result = await response.json();
-                alert("Upload successful:\n" + JSON.stringify(result, null, 2));
-                console.log(result);
-            } catch (err) {
-                alert("Upload failed: " + err.message);
-                console.error(err);
-            }
+    try {
+        const response = await fetch("/v1/audio/upload", { // make sure this matches router prefix
+            method: "POST",
+            body: formData
         });
 
-        function cancelUpload() {
-            if (confirm("Cancel upload?")) {
-                window.location.href = "index.html"; // Go back to map or homepage
-            }
+        const result = await response.json();
+
+        if (response.ok) {
+            alert("Upload successful! Audio ID: " + result.audio_id);
+            // Optional: redirect after success
+            window.location.href = "/"; 
+        } else {
+            alert("Upload failed: " + result.message);
         }
-    </script>
+    } catch (err) {
+        alert("Upload failed: " + err.message);
+        console.error(err);
+    }
+});
+
+function cancelUpload() {
+    if (confirm("Cancel upload?")) {
+        window.location.href = "/"; // Go back to map or homepage
+    }
+}
+</script>
 
 </body>
 

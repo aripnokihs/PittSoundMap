@@ -65,8 +65,8 @@
   </div> -->
 
   <!-- Login button (top-right) -->
-  <div class="top-right">
-    <button onclick="login()">Login</button>
+  <div class="top-right" id="status-container">
+    <!-- JS will fill this -->
   </div>
 
   <!-- Map container -->
@@ -76,6 +76,45 @@
   <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
   
   <script>
+
+    // =====================================
+    //  Modifier state
+    // =====================================
+    let isLoggedIn = false;   // 🔹 single modifier
+    let currentUser = null;   // store username if needed
+
+    const params = new URLSearchParams(window.location.search);
+    if (params.has("user")) {
+      isLoggedIn = true;
+      currentUser = params.get("user");
+    }
+
+    // =====================================
+    //  Render status UI based on modifier
+    // =====================================
+    function renderStatus() {
+      const container = document.getElementById("status-container");
+      container.innerHTML = ""; // clear
+
+      if (isLoggedIn) {
+        const welcome = document.createElement("span");
+        welcome.textContent = "✅ Logged in as " + currentUser;
+        welcome.style.marginRight = "10px";
+        welcome.style.fontWeight = "bold";
+
+        const logoutBtn = document.createElement("button");
+        logoutBtn.textContent = "Logout";
+        logoutBtn.onclick = logout;
+
+        container.appendChild(welcome);
+        container.appendChild(logoutBtn);
+      } else {
+        const loginBtn = document.createElement("button");
+        loginBtn.textContent = "Login";
+        loginBtn.onclick = login;
+        container.appendChild(loginBtn);
+      }
+    }
     // Initialize map centered on University of Pittsburgh
     var map = L.map('map').setView([40.444, -79.960], 15);
 
@@ -348,30 +387,93 @@
         `;
       });
 
-    html += `
-      <div style="margin-top:10px;">
-        <button onclick="uploadSound('${place.name}')">Upload Sound</button>
-      </div>
-      `;
+    if (isLoggedIn) {
+        html += `<div style="margin-top:10px;">
+                   <button onclick="uploadSound('${place.name}')">Upload Sound</button>
+                 </div>`;
+      } else {
+        html += `<div style="margin-top:10px;">
+                   <button disabled title="Login required">Upload Sound (Login first)</button>
+                 </div>`;
+      }
       return html;
     }
 
-
-    // Create markers with audio popups
+    // Create markers, update popup dynamically on open
     Object.values(placeData).forEach(place => {
       var marker = L.marker(place.coords).addTo(map);
-      marker.bindPopup(buildPopup(place));
+
+      // attach an empty popup (required for click-to-open)
+      marker.bindPopup("");
+
+      // when popup opens, rebuild its content based on login status
+      marker.on("popupopen", function (e) {
+        e.popup.setContent(buildPopup(place));
+      });
     });
 
     // Dummy button actions
     function uploadSound(placeName) {
       // alert("Upload sound feature coming soon!");
-      window.location.href = "upload.html?place=" + encodeURIComponent(placeName);
+      window.location.href = "/upload?place=" + encodeURIComponent(placeName);
     }
 
     function login() {
-      window.location.href = "login.html";
+      window.location.href = "/login";
     }
+
+    // function login() {
+    //   // fake login for demo — replace with fetch("/users/get")
+    //   fetch("/v1/users/get", {
+    //     method: "POST",
+    //     body: new URLSearchParams({ username: "brandon", password: "1234" }),
+    //     headers: { "Content-Type": "application/x-www-form-urlencoded" }
+    //   })
+    //   .then(res => {
+    //     if (res.ok) {
+    //       isLoggedIn = true;   // 🔹 update modifier
+    //       currentUser = "brandon";
+    //       renderStatus();
+    //     } else {
+    //       alert("Login failed");
+    //     }
+    //   });
+    // }
+
+    async function checkSession() {
+  try {
+    const res = await fetch("/v1/users/session");
+    const data = await res.json();
+    if (data.user) {
+      isLoggedIn = true;
+      currentUser = data.user;
+    } else {
+      isLoggedIn = false;
+      currentUser = null;
+    }
+    renderStatus();
+  } catch (err) {
+    console.error("Failed to fetch session:", err);
+  }
+}
+
+function logout() {
+  fetch("/v1/users/logout", { method: "POST" })
+    .then(() => {
+      isLoggedIn = false;
+      currentUser = null;
+      renderStatus();
+    });
+}
+
+// existing renderStatus() stays the same...
+// just call checkSession() on page load
+checkSession();
+
+    // =====================================
+    // Init
+    // =====================================
+    renderStatus();
   </script>
 </body>
 </html>
