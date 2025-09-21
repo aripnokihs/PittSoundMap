@@ -60,9 +60,9 @@
 </head>
 <body>
   <!-- Upload button (top-left) -->
-  <div class="top-left">
+  <!-- <div class="top-left">
     <button onclick="uploadSound()">Upload Sound</button>
-  </div>
+  </div> -->
 
   <!-- Login button (top-right) -->
   <div class="top-right">
@@ -347,6 +347,12 @@
           </div>
         `;
       });
+
+    html += `
+      <div style="margin-top:10px;">
+        <button onclick="uploadSound('${place.name}')">Upload Sound</button>
+      </div>
+      `;
       return html;
     }
 
@@ -358,9 +364,9 @@
     });
 
     // Dummy button actions
-    function uploadSound() {
+    function uploadSound(placeName) {
       // alert("Upload sound feature coming soon!");
-      window.location.href = "upload.html";
+      window.location.href = "upload.html?place=" + encodeURIComponent(placeName);
     }
 
     function login() {
