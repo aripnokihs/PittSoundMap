@@ -1,69 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<<<<<<< HEAD
-    <meta charset = "UTF-8">
-    <title> Login - Pitt Sound Map</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<style> 
-    body{
-        font-family: Arial, Helvetica, sans-serif, sans-serif;
-        background-image: url("pitt.jpg");
-        display: flex;
-        justify-content: center;
-        align-self: center;
-        /* Makes the centering fit to any screen*/
-        height: 100vh;
-    }
-
-    .login-box{
-        background-color: whitesmoke;
-        padding: auto;
-        border-radius: 10px;
-        height: 400px;
-        width: 500px;
-        padding: 10px;
-    }
-    input[type=text], input[type=password] {
-    width: 100%;
-    padding: 12px 20px;
-    margin: 10px 0;
-    display: block;
-    border: 2px solid #ccc;
-    box-sizing: border-box;
-
-}
-    button {
-    background-color: #003594;;
-    color: white;
-    padding: 14px 20px;
-    margin: 8px 0;
-    border: none;
-    cursor: pointer;
-    width: 100%;
-}
-    button:hover {
-    opacity: 0.8;
-}
-
-
-</style>
-
-<body>
-    <div class="login-box">
-        <h1 style="text-align: center"> Sign Up to Pitt Sound Map </h1>
-        <form id="login" action="v1/users/add" method="post">
-        <!--Username-->
-        <label for="username" style="padding: 10px" ><b> Username:</b></label>
-        <input type = "text" placeholder="Enter Username" name = "username">
-        
-        <!--Password-->
-        <label for="password" style="padding: 10px;"><b>Password:</b></label> 
-        <input type = "password" name="password" placeholder="Enter Password" password = "password"> 
-         <label for="password" style="padding: 10px;"><b>Verify Password:</b></label> 
-        <input type = "password" name="password" placeholder="Enter Password" password = "password"> 
-        <button type="submit">Sign Up</button>
-=======
     <meta charset="UTF-8">
     <title>Sign Up - Pitt Sound Map</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -131,30 +68,11 @@
 
             <button type="submit">Sign Up</button>
              <button type="button" onclick="cancel()"> Cancel </button>
->>>>>>> brandon-testing-branch
         
         </form>
     </div>
     
     <script>
-<<<<<<< HEAD
-        const form = document.getElementById("login");
-       form.addEventListener("submit", async(event) => {
-        event.preventDefault;
-
-       const username = form.elements["username"].value;
-       const password = form.elements["password"].value;
-
-        try{
-            response = await fetch()
-        }
-        catch{
-
-        }
-
-
-    });
-=======
         const form = document.getElementById("signup-form");
   
         const passwordInput = form.elements["password"];
@@ -186,7 +104,6 @@
         window.location.href ="login.html"
     }
     
->>>>>>> brandon-testing-branch
     </script>
 
 </body>
