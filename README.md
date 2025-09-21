@@ -1,4 +1,4 @@
-# 🗺️ Pitt Sound Map
+# 🗺️ Pitt Map of Sounds
 ### For SteelHacks XII
 
 ![Project Banner Placeholder](/assets/banner.png)
@@ -6,7 +6,7 @@
 
 ## 🌟 Overview
 
-Pitt Sound Map is an interactive platform that enhances **accessibility on campus** while also helping **alumni reconnect with familiar places** through sound.
+The Pitt Map of Sounds is an interactive platform that enhances **accessibility on campus** while also helping **alumni reconnect with familiar places** through sound.
 
 * For **current students and visitors**, the map provides auditory cues about traffic signals, daily campus activity, and special events — supporting users with visual impairments or those seeking greater spatial awareness.
 * For **alumni**, the map serves as an immersive memory portal, allowing them to hear iconic campus sounds (Cathedral bells, Schenley Plaza chatter, Forbes traffic lights) and relive their Pitt experience.
