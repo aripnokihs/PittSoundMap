@@ -32,3 +32,5 @@ uploads/
 *.egg-info/
 dist/
 build/
+
+/app/static/audio
