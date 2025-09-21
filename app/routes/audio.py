@@ -19,9 +19,29 @@ conninfo = (
 UPLOAD_DIR = "audios"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
-@router.get("/")
-def root():
-    return {"status": "up"}
+@router.get("/{location}")
+def get_audios(location: str):
+    try:
+        with psycopg.connect(
+            host="localhost", dbname="soundmap-db", user="postgres", password="postgres", row_factory=dict_row
+        ) as conn:
+            with conn.cursor() as cur:
+                cur.execute(
+                    """
+                    SELECT title, location, description, tags, date, time_of_day, file_path
+                    FROM audios
+                    WHERE location = %s
+                    ORDER BY date DESC
+                    """,
+                    (location,)
+                )
+                results = cur.fetchall()
+                if not results:
+                    return {"audios": []}
+                return {"audios": results}
+    except Exception as e:
+        print("ERROR:", e)
+        raise HTTPException(status_code=500, detail=str(e))
 
 @router.post("/upload")
 async def upload_audio(

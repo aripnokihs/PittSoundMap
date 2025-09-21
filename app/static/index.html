@@ -387,6 +387,22 @@
         `;
       });
 
+      // fetching data for each pin
+      async function fetchAudios(place) {
+        try {
+            const res = await fetch(`/v1/audio/place/${encodeURIComponent(place)}`);
+            const data = await res.json();
+            if (data.error) {
+                console.error("Error fetching audios:", data.error);
+                return [];
+            }
+            return data.audios;
+        } catch (err) {
+            console.error("Fetch failed:", err);
+            return [];
+        }
+      }
+
     if (isLoggedIn) {
         html += `<div style="margin-top:10px;">
                    <button onclick="uploadSound('${place.name}')">Upload Sound</button>

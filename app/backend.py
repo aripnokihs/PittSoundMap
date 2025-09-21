@@ -17,7 +17,7 @@ app = FastAPI()
 
 app.include_router(health.router, prefix=f"{API_VERSION}/health", tags=["Health"])
 app.include_router(users.router, prefix=f"{API_VERSION}/users", tags=["Users"])
-app.include_router(audio.router, prefix=f"{API_VERSION}/audio", tags=["Audio"] )
+app.include_router(audio.router, prefix=f"{API_VERSION}/audios", tags=["Audio"] )
 
 # Static directory path
 STATIC_DIR = os.path.join(os.path.dirname(__file__), "static")
