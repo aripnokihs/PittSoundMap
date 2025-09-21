@@ -65,7 +65,7 @@
 <body>
     <div class="login-box">
         <h1 style="text-align: center"> Login to Pitt Sound Map </h1>
-        <form id="login-form" action="/v1/users/get" method="post">
+        <form id="login-form" action="javascript:void(0);">
             <!-- Username -->
             <label for="username"><b>Username:</b></label>
             <input type="text" name="username" placeholder="Enter Username" required>
@@ -97,8 +97,11 @@ form.addEventListener("submit", async (event) => {
     });
 
     const data = await response.json();
-    if (response.ok && data.status === "success") {
-      window.location.href = "/";  // go back to map
+    console.log("Login response:", data);
+    if (response.ok && data.status === "success" && data.role === "admin") {
+      window.location.href = "/admin";  // go back to map
+    } else if (response.ok && data.status === "success") {
+      window.location.href = "/"
     } else {
       alert("Login failed: " + data.message);
     }

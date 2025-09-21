@@ -47,47 +47,42 @@ def get_audios(location: str):
 async def upload_audio(
     title: str = Form(...),
     place: str = Form(...),
-    date: str = Form(...),  # or `date: date = Form(...)` if you want auto-parsing
+    date: str = Form(...),
     timeOfDay: str = Form(...),
     audioFile: UploadFile = File(...),
     tags: str = Form(...),
     description: str = Form(None),
 ):
-    
     if not audioFile.content_type.startswith("audio/"):
         raise HTTPException(status_code=400, detail="File must be an audio type")
-    
 
-    # Generate unique filename with timestamp
-    timestamp = int(time.time())
-    unique_filename = f"{timestamp}_{audioFile.filename}"
-    file_path = os.path.join(UPLOAD_DIR, unique_filename)
-    
-    # File type / extension
-    _, file_type = os.path.splitext(audioFile.filename)
-    
-    # Save the file to disk
-    with open(file_path, "wb") as buffer:
-        shutil.copyfileobj(audioFile.file, buffer)
     try:
+        # Generate unique filename
+        timestamp = int(time.time())
+        unique_filename = f"{timestamp}_{audioFile.filename}"
+        file_path = os.path.join(UPLOAD_DIR, unique_filename)
+
+        _, file_type = os.path.splitext(audioFile.filename)
+
+        # Save file
+        with open(file_path, "wb") as buffer:
+            shutil.copyfileobj(audioFile.file, buffer)
+
+        # Insert into DB
         with psycopg.connect(conninfo) as conn:
             with conn.cursor() as cur:
                 cur.execute(
-                    """INSERT INTO audios (title, location, description, tags, date, time_of_day, file_path, file_type)
-                    VALUES (%s,%s,%s,%s,%s,%s,%s,%s)
-                    RETURNING id """,
-                    (title, 
-                     place,
-                     description,
-                     tags,
-                     date,
-                     timeOfDay,
-                     file_path,
-                     file_type
-                     )
+                    """INSERT INTO audios 
+                       (title, location, description, tags, date, time_of_day, file_path, file_type)
+                       VALUES (%s,%s,%s,%s,%s,%s,%s,%s)
+                       RETURNING id""",
+                    (title, place, description, tags, date, timeOfDay, file_path, file_type)
                 )
-                user_id = cur.fetchone()[0]
+                audio_id = cur.fetchone()[0]
                 conn.commit()
-        return {"status": "success", "user_id": user_id}
+
+        return {"status": "success", "audio_id": audio_id}
+
     except Exception as e:
-        return {"status": "error", "message": str(e)}
+        print("Upload error:", e)
+        raise HTTPException(status_code=500, detail=str(e))

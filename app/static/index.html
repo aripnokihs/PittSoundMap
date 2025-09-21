@@ -68,6 +68,19 @@
     .leaflet-popup-content {
       width: 450px !important;
     }
+    .header-btn {
+      background: #FFB81C; /* Pitt gold */
+      border: none;
+      border-radius: 6px;
+      padding: 6px 12px;
+      font-weight: bold;
+      cursor: pointer;
+      margin-left: 8px;
+    }
+    .header-btn:hover {
+      background: white;
+      color: #003594; /* Pitt blue */
+    }
   </style>
 </head>
 
@@ -106,28 +119,39 @@
     //  Render status UI based on modifier
     // =====================================
     function renderStatus() {
-      const container = document.getElementById("status-container");
-      container.innerHTML = ""; // clear
+  const container = document.getElementById("status-container");
+  container.innerHTML = "";
 
-      if (isLoggedIn) {
-        const welcome = document.createElement("span");
-        welcome.textContent = "✅ Logged in as " + currentUser;
-        welcome.style.marginRight = "10px";
-        welcome.style.fontWeight = "bold";
+  if (isLoggedIn) {
+    const welcome = document.createElement("span");
+    welcome.textContent = currentUser;
+    welcome.style.marginRight = "10px";
+    welcome.style.fontWeight = "bold";
 
-        const logoutBtn = document.createElement("button");
-        logoutBtn.textContent = "Logout";
-        logoutBtn.onclick = logout;
+    container.appendChild(welcome);
 
-        container.appendChild(welcome);
-        container.appendChild(logoutBtn);
-      } else {
-        const loginBtn = document.createElement("button");
-        loginBtn.textContent = "Login";
-        loginBtn.onclick = login;
-        container.appendChild(loginBtn);
-      }
+    // Admin Dashboard button only for admin
+    if (currentUser === "admin") {
+      const adminBtn = document.createElement("button");
+      adminBtn.textContent = "Admin Dashboard";
+      adminBtn.onclick = () => {
+        window.location.href = "/admin";
+      };
+      container.appendChild(adminBtn);
     }
+
+    const logoutBtn = document.createElement("button");
+    logoutBtn.textContent = "Logout";
+    logoutBtn.onclick = logout;
+    container.appendChild(logoutBtn);
+  } else {
+    const loginBtn = document.createElement("button");
+    loginBtn.textContent = "Login";
+    loginBtn.onclick = login;
+    container.appendChild(loginBtn);
+  }
+}
+
     // Initialize map centered on University of Pittsburgh
     var map = L.map('map').setView([40.444, -79.960], 15);
 
@@ -464,31 +488,47 @@
     }
 
 
-    // fetching data for each pin
-    async function fetchAudios(place) {
-      try {
-        const res = await fetch(`/v1/audios/${encodeURIComponent(place)}`);
-        const data = await res.json();
-        if (data.error) {
-          console.error("Error fetching audios:", data.error);
-          return [];
+      // fetching data for each pin
+      async function fetchAudios(place) {
+        try {
+            const res = await fetch(`/v1/audio/place/${encodeURIComponent(place)}`);
+            const data = await res.json();
+            if (data.error) {
+                console.error("Error fetching audios:", data.error);
+                return [];
+            }
+            return data.audios;
+        } catch (err) {
+            console.error("Fetch failed:", err);
+            return [];
         }
-        return data.audios;
-      } catch (err) {
-        console.error("Fetch failed:", err);
-        return [];
       }
+      // refresh button
+html += `
+  <div style="margin-top:10px; display:flex; justify-content:space-between; align-items:center;">
+    ${
+      isLoggedIn
+        ? `<button class="upload-btn" data-place="${place.name}">Upload Sound</button>`
+        : `<button disabled title="Login required">Upload Sound (Login first)</button>`
+    }
+    <button class="refresh-btn" data-place="${place.name}">Refresh</button>
+  </div>
+`;
+return html;
     }
 
-    async function refreshAudios(placeName, buttonEl) {
-      let audios = await fetchAudios(placeName);
-      audios = shuffleArray(audios);
+function renderAudios(container, audios, activeTags) {
+  const filtered = audios.filter(a => activeTags.includes(a.tag));
+  if (filtered.length === 0) {
+    container.innerHTML = `<em>No audios match selected tags.</em>`;
+    return;
+  }
+  const shuffled = [...filtered].sort(() => 0.5 - Math.random());
+  const limited = shuffled.slice(0, 3);
 
-      let html = `<b>${placeName}</b><br>`;
-
-      audios.forEach(a => {
-        const mime = getMimeType(a.file_path);
-        html += `
+  container.innerHTML = limited.map(a => {
+    const mime = getMimeType(a.file);
+    return `
       <div class="popup-audio">
         <strong>${a.title}</strong><br>
         <audio controls controlsList="nodownload">

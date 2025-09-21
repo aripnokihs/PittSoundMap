@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Admin – Pitt Sound Map</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f5f7fa;
+      color: #333;
+    }
+    header {
+      background: #003594; /* Pitt blue */
+      color: white;
+      padding: 12px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    header h1 {
+      margin: 0;
+      font-size: 20px;
+    }
+    #status-container button {
+      background: #FFB81C; /* Pitt gold */
+      border: none;
+      border-radius: 6px;
+      padding: 6px 10px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    #status-container button:hover {
+      background: white;
+      color: #003594;
+    }
+    main {
+      padding: 20px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: white;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+    th, td {
+      padding: 10px;
+      border-bottom: 1px solid #ddd;
+      text-align: left;
+      font-size: 14px;
+    }
+    th {
+      background: #003594;
+      color: white;
+      position: sticky;
+      top: 0;
+    }
+    tr:hover {
+      background: #f1f1f1;
+    }
+    button.action {
+      padding: 5px 8px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: bold;
+      font-size: 13px;
+    }
+    button.delete {
+      background: #c62828;
+      color: white;
+    }
+    button.delete:hover {
+      background: #e53935;
+    }
+    button.play {
+      background: #2e7d32;
+      color: white;
+    }
+    button.play:hover {
+      background: #43a047;
+    }
+  </style>
+</head>
+<body>
+<header style="display:flex; align-items:center; justify-content:space-between;">
+  <!-- Left side: title + back button -->
+  <div style="display:flex; align-items:center; gap:12px;">
+    <h1 style="margin:0;">Admin Dashboard</h1>
+    <button id="map-btn" class="button">Back to Map</button>
+  </div>
+
+  <!-- Right side: status (login/logout) -->
+  <div id="status-container"></div>
+</header>
+
+
+  <main>
+    <h2>All Uploaded Audios</h2>
+    <table id="audio-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Title</th>
+          <th>Location</th>
+          <th>Date</th>
+          <th>Time</th>
+          <th>Tags</th>
+          <th>Description</th>
+          <th>File</th>
+          <th>File Type</th>
+          <th>Upload Time</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Rows injected by JS -->
+      </tbody>
+    </table>
+  </main>
+
+  <script>
+    // ======== MOCK DATA ========
+    let isLoggedIn = false;
+    let currentUser = null;
+
+    async function checkSession() {
+    try {
+        const res = await fetch("/v1/users/session");
+        const data = await res.json();
+        if (data.user) {
+        isLoggedIn = true;
+        currentUser = data.user;
+        } else {
+        isLoggedIn = false;
+        currentUser = null;
+        }
+        renderStatus();
+    } catch (err) {
+        console.error("Session check failed:", err);
+        renderStatus();
+    }
+    }
+
+    const mockAudios = [
+      {
+        id: 1,
+        title: "Bell Tower",
+        location: "Cathedral of Learning",
+        date: "2025-09-15",
+        time_of_day: "morning",
+        tags: "daily",
+        description: "Classic Pitt bell sound",
+        file_path: "audios/bell.mp3",
+        file_type: "mp3",
+        upload_time: "2025-09-15 09:12:45"
+      },
+      {
+        id: 2,
+        title: "Traffic Horns",
+        location: "Forbes & Bigelow",
+        date: "2025-09-16",
+        time_of_day: "evening",
+        tags: "incident",
+        description: "Rush hour chaos",
+        file_path: "audios/horns.wav",
+        file_type: "wav",
+        upload_time: "2025-09-16 18:27:10"
+      },
+      {
+        id: 3,
+        title: "Plaza Ambience",
+        location: "Schenley Plaza",
+        date: "2025-09-14",
+        time_of_day: "afternoon",
+        tags: "event",
+        description: "Relaxing plaza background noise",
+        file_path: "audios/plaza.ogg",
+        file_type: "ogg",
+        upload_time: "2025-09-14 14:03:59"
+      }
+    ];
+    
+    document.getElementById("map-btn").onclick = () => {
+        window.location.href = "/";
+    };
+    // ======== STATUS UI ========
+    function renderStatus() {
+      const container = document.getElementById("status-container");
+      container.innerHTML = "";
+
+      if (isLoggedIn) {
+        const span = document.createElement("span");
+        span.textContent = currentUser;
+        span.style.marginRight = "10px";
+
+        const logoutBtn = document.createElement("button");
+        logoutBtn.textContent = "Logout";
+        logoutBtn.onclick = logout;
+
+        container.appendChild(span);
+        container.appendChild(logoutBtn);
+      } else {
+        const loginBtn = document.createElement("button");
+        loginBtn.textContent = "Login";
+        loginBtn.onclick = () => {
+          isLoggedIn = true;
+          currentUser = "admin";
+          renderStatus();
+        };
+        container.appendChild(loginBtn);
+      }
+    }
+
+    function logout() {
+  fetch("/v1/users/logout", { method: "POST" })
+    .then(() => {
+      isLoggedIn = false;
+      currentUser = null;
+      renderStatus();
+      window.location.href = "/"; // ✅ back to map logged out
+    });
+}
+
+    // ======== AUDIO TABLE ========
+    function loadAudios() {
+      const tbody = document.querySelector("#audio-table tbody");
+      tbody.innerHTML = "";
+
+      mockAudios.forEach(a => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${a.id}</td>
+          <td>${a.title}</td>
+          <td>${a.location}</td>
+          <td>${a.date}</td>
+          <td>${a.time_of_day}</td>
+          <td>${a.tags}</td>
+          <td>${a.description}</td>
+          <td>${a.file_path}</td>
+          <td>${a.file_type}</td>
+          <td>${a.upload_time}</td>
+          <td>
+            <button class="action play" onclick="playAudio('${a.file_path}')">▶ Play</button>
+            <button class="action delete" onclick="deleteAudio(${a.id})">🗑 Delete</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function playAudio(filePath) {
+      const audio = new Audio(filePath);
+      audio.play().catch(err => console.error("Play failed:", err));
+    }
+
+    function deleteAudio(id) {
+      alert("Pretend to delete audio with id " + id);
+    }
+
+    // ======== INIT ========
+    checkSession();
+    renderStatus();
+    loadAudios();
+  </script>
+</body>
+</html>

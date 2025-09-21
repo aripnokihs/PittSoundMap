@@ -46,7 +46,7 @@ async def add_user(username: str = Form(...), password: str = Form(...)):
                 user_id = cur.fetchone()[0]
                 conn.commit()
 
-        return RedirectResponse(url="/static/index.html", status_code=303)
+        return RedirectResponse(url="/login", status_code=303)
     except Exception as e:
         return {"status": "error", "message": str(e)}
 
@@ -77,9 +77,9 @@ async def get_user(username: str = Form(...), password: str = Form(...)):
 
 @router.post("/login")
 async def login_user(
+    response: Response,
     username: str = Form(...),
-    password: str = Form(...),
-    response: Response = None
+    password: str = Form(...)
 ):
     try:
         with psycopg.connect(conninfo, row_factory=dict_row) as conn:
@@ -95,13 +95,16 @@ async def login_user(
         response.set_cookie(
             key="session",
             value=session_token,
-            httponly=True,  # protects from JavaScript access
+            httponly=True,
             samesite="lax",
         )
 
-        return {"status": "success", "user": username}
+        role = "admin" if username == "admin" else "user"
+
+        return {"status": "success", "user": username, "role": role}
     except Exception as e:
         return {"status": "error", "message": str(e)}
+
 
 
 @router.get("/session")
