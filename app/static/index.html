@@ -138,7 +138,9 @@
         name: "Schenley Plaza",
         coords: [40.44291, -79.95241],
         audios: [
-          { title: "Plaza Ambience", file: "audio/plaza.mp3", date: "2025-09-12", timeOfDay: "evening", tag: "event", description: "Relaxing plaza sounds." }
+          { title: "Plaza Ambience", file: "audio/plaza.mp3", date: "2025-09-12", timeOfDay: "evening", tag: "event", description: "Relaxing plaza sounds." },
+          { title: "PA2", file: "audio/plaza.mp3", date: "2025-09-12", timeOfDay: "evening", tag: "daily", description: "Relaxing plaza sounds." },
+          { title: "PA3", file: "audio/plaza.mp3", date: "2025-09-12", timeOfDay: "evening", tag: "incident", description: "Relaxing plaza sounds." },
         ]
       },
       "forbes": {
@@ -369,23 +371,33 @@
 
     function buildPopup(place) {
       let html = `<b>${place.name}</b><br>`;
-      place.audios.forEach(a => {
-        const mime = getMimeType(a.file);
-        html += `
-          <div class="popup-audio">
-            <strong>${a.title}</strong><br>
-            <audio controls controlsList="nodownload">
-              <source src="${a.file}" type="${mime}">
-              Your browser does not support audio.
-            </audio>
-            <div class="popup-meta">
-              <em>${a.date}, ${a.timeOfDay}</em><br>
-              <span>Tag: ${a.tag}</span><br>
-              <span>${a.description}</span>
-            </div>
-          </div>
-        `;
-      });
+
+      html += `
+        <div class="popup-filters">
+          <label><input type="checkbox" class="tag-filter" value="daily" checked> Daily</label>
+          <label><input type="checkbox" class="tag-filter" value="event" checked> Event</label>
+          <label><input type="checkbox" class="tag-filter" value="incident" checked> Incident</label>
+        </div>
+        <div class="popup-audios"></div>
+      `;
+
+      // place.audios.forEach(a => {
+      //   const mime = getMimeType(a.file);
+      //   html += `
+      //     <div class="popup-audio">
+      //       <strong>${a.title}</strong><br>
+      //       <audio controls controlsList="nodownload">
+      //         <source src="${a.file}" type="${mime}">
+      //         Your browser does not support audio.
+      //       </audio>
+      //       <div class="popup-meta">
+      //         <em>${a.date}, ${a.timeOfDay}</em><br>
+      //         <span>Tag: ${a.tag}</span><br>
+      //         <span>${a.description}</span>
+      //       </div>
+      //     </div>
+      //   `;
+      // });
 
       // fetching data for each pin
       async function fetchAudios(place) {
@@ -415,6 +427,30 @@
       return html;
     }
 
+    function renderAudios(container, audios, activeTags) {
+      container.innerHTML = ""; // clear
+      audios
+        .filter(a => activeTags.includes(a.tag)) // ✅ filter by selected tags
+        .forEach(a => {
+          const mime = getMimeType(a.file);
+          container.innerHTML += `
+            <div class="popup-audio">
+              <strong>${a.title}</strong><br>
+              <audio controls controlsList="nodownload">
+                <source src="${a.file}" type="${mime}">
+                Your browser does not support audio.
+              </audio>
+              <div class="popup-meta">
+                <em>${a.date}, ${a.timeOfDay}</em><br>
+                <span>Tag: ${a.tag}</span><br>
+                <span>${a.description}</span>
+              </div>
+            </div>
+          `;
+    });
+}
+
+
     // Create markers, update popup dynamically on open
     Object.values(placeData).forEach(place => {
       var marker = L.marker(place.coords).addTo(map);
@@ -425,6 +461,23 @@
       // when popup opens, rebuild its content based on login status
       marker.on("popupopen", function (e) {
         e.popup.setContent(buildPopup(place));
+
+        const container = e.popup.getElement().querySelector(".popup-audios");
+        const checkboxes = e.popup.getElement().querySelectorAll(".tag-filter");
+
+        // initial render (all checked)
+        let activeTags = Array.from(checkboxes).map(cb => cb.value);
+        renderAudios(container, place.audios, activeTags);
+
+        // update on checkbox change
+        checkboxes.forEach(cb => {
+          cb.addEventListener("change", () => {
+            activeTags = Array.from(checkboxes)
+              .filter(c => c.checked)
+              .map(c => c.value);
+            renderAudios(container, place.audios, activeTags);
+          });
+        });
       });
     });
 
