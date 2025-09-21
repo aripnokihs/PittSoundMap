@@ -22,7 +22,7 @@ app.include_router(audio.router, prefix=f"{API_VERSION}/audios", tags=["Audio"] 
 # Static directory path
 STATIC_DIR = os.path.join(os.path.dirname(__file__), "static")
 app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
-app.mount("/audios", StaticFiles(directory="audios"), name="audio")
+app.mount("/audios", StaticFiles(directory=os.path.join(os.path.dirname(__file__), "..", "audios")), name="audios")
 
 # Page routes
 @app.get("/")
