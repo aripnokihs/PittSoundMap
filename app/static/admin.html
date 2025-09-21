@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html>
+
 <head>
   <meta charset="utf-8" />
   <title>Admin – Pitt Sound Map</title>
@@ -12,54 +13,67 @@
       background: #f5f7fa;
       color: #333;
     }
+
     header {
-      background: #003594; /* Pitt blue */
+      background: #003594;
+      /* Pitt blue */
       color: white;
       padding: 12px 20px;
       display: flex;
       justify-content: space-between;
       align-items: center;
     }
+
     header h1 {
       margin: 0;
       font-size: 20px;
     }
+
     #status-container button {
-      background: #FFB81C; /* Pitt gold */
+      background: #FFB81C;
+      /* Pitt gold */
       border: none;
       border-radius: 6px;
       padding: 6px 10px;
       font-weight: bold;
       cursor: pointer;
     }
+
     #status-container button:hover {
       background: white;
       color: #003594;
     }
+
     main {
       padding: 20px;
     }
+
     table {
       width: 100%;
       border-collapse: collapse;
       background: white;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
     }
-    th, td {
+
+    th,
+    td {
       padding: 10px;
       border-bottom: 1px solid #ddd;
       text-align: left;
       font-size: 14px;
     }
+
     th {
       background: #003594;
       color: white;
       position: sticky;
       top: 0;
     }
+
     tr:hover {
       background: #f1f1f1;
     }
+
     button.action {
       padding: 5px 8px;
       border: none;
@@ -68,37 +82,43 @@
       font-weight: bold;
       font-size: 13px;
     }
+
     button.delete {
       background: #c62828;
       color: white;
     }
+
     button.delete:hover {
       background: #e53935;
     }
+
     button.play {
       background: #2e7d32;
       color: white;
     }
+
     button.play:hover {
       background: #43a047;
     }
   </style>
 </head>
-<body>
-<header style="display:flex; align-items:center; justify-content:space-between;">
-  <!-- Left side: title + back button -->
-  <div style="display:flex; align-items:center; gap:12px;">
-    <h1 style="margin:0;">Admin Dashboard</h1>
-    <button id="map-btn" class="button">Back to Map</button>
-  </div>
 
-  <!-- Right side: status (login/logout) -->
-  <div id="status-container"></div>
-</header>
+<body>
+  <header style="display:flex; align-items:center; justify-content:space-between;">
+    <!-- Left side: title + back button -->
+    <div style="display:flex; align-items:center; gap:12px;">
+      <h1 style="margin:0;">Admin Dashboard</h1>
+      <button id="map-btn" class="button">Back to Map</button>
+    </div>
+
+    <!-- Right side: status (login/logout) -->
+    <div id="status-container"></div>
+  </header>
 
 
   <main>
     <h2>All Uploaded Audios</h2>
+    <audio id="audio-player" controls style="display:none;"></audio>
     <table id="audio-table">
       <thead>
         <tr>
@@ -127,21 +147,21 @@
     let currentUser = null;
 
     async function checkSession() {
-    try {
+      try {
         const res = await fetch("/v1/users/session");
         const data = await res.json();
         if (data.user) {
-        isLoggedIn = true;
-        currentUser = data.user;
+          isLoggedIn = true;
+          currentUser = data.user;
         } else {
-        isLoggedIn = false;
-        currentUser = null;
+          isLoggedIn = false;
+          currentUser = null;
         }
         renderStatus();
-    } catch (err) {
+      } catch (err) {
         console.error("Session check failed:", err);
         renderStatus();
-    }
+      }
     }
 
     const mockAudios = [
@@ -182,9 +202,9 @@
         upload_time: "2025-09-14 14:03:59"
       }
     ];
-    
+
     document.getElementById("map-btn").onclick = () => {
-        window.location.href = "/";
+      window.location.href = "/";
     };
     // ======== STATUS UI ========
     function renderStatus() {
@@ -215,49 +235,90 @@
     }
 
     function logout() {
-  fetch("/v1/users/logout", { method: "POST" })
-    .then(() => {
-      isLoggedIn = false;
-      currentUser = null;
-      renderStatus();
-      window.location.href = "/"; // ✅ back to map logged out
-    });
-}
+      fetch("/v1/users/logout", { method: "POST" })
+        .then(() => {
+          isLoggedIn = false;
+          currentUser = null;
+          renderStatus();
+          window.location.href = "/"; // ✅ back to map logged out
+        });
+    }
 
     // ======== AUDIO TABLE ========
-    function loadAudios() {
+    async function loadAudios() {
       const tbody = document.querySelector("#audio-table tbody");
       tbody.innerHTML = "";
 
-      mockAudios.forEach(a => {
+      let audios = [];
+      try {
+        const res = await fetch("/v1/audios"); // endpoint returning all audios
+        const data = await res.json();
+        if (data.audios) audios = data.audios;
+      } catch (err) {
+        console.error("Failed to fetch audios:", err);
+      }
+
+      audios.forEach(a => {
         const tr = document.createElement("tr");
         tr.innerHTML = `
-          <td>${a.id}</td>
-          <td>${a.title}</td>
-          <td>${a.location}</td>
-          <td>${a.date}</td>
-          <td>${a.time_of_day}</td>
-          <td>${a.tags}</td>
-          <td>${a.description}</td>
-          <td>${a.file_path}</td>
-          <td>${a.file_type}</td>
-          <td>${a.upload_time}</td>
-          <td>
-            <button class="action play" onclick="playAudio('${a.file_path}')">▶ Play</button>
-            <button class="action delete" onclick="deleteAudio(${a.id})">🗑 Delete</button>
-          </td>
-        `;
+      <td>${a.id}</td>
+      <td>${a.title}</td>
+      <td>${a.location}</td>
+      <td>${a.date}</td>
+      <td>${a.time_of_day}</td>
+      <td>${a.tags}</td>
+      <td>${a.description || ""}</td>
+      <td>${a.file_path}</td>
+      <td>${a.file_type}</td>
+      <td>${a.uploaded_at}</td>
+      <td>
+        <button class="action play" onclick="playAudio('${a.file_path}')">▶ Play</button>
+        <button class="action delete" onclick="deleteAudio(${a.id})">🗑 Delete</button>
+      </td>
+    `;
         tbody.appendChild(tr);
       });
     }
-
     function playAudio(filePath) {
-      const audio = new Audio(filePath);
-      audio.play().catch(err => console.error("Play failed:", err));
+      const player = document.getElementById("audio-player");
+
+      // Replace every instance of this string (not good practice and should be fixed)
+      filePath = filePath.replace("/v1/audios/", "");
+
+      // Ensure leading slash
+      if (!filePath.startsWith("/")) filePath = "/" + filePath;
+
+      const url = "/v1/audios/" + filePath;
+
+      if (player.src !== url) {
+        player.src = url;
+        player.load();
+      }
+      player.style.display = "block";
+      player.play().catch(err => console.error("Play failed:", err));
     }
 
-    function deleteAudio(id) {
-      alert("Pretend to delete audio with id " + id);
+
+
+
+
+
+    async function deleteAudio(id) {
+      if (!confirm("Are you sure you want to delete this audio?")) return;
+
+      try {
+        const res = await fetch(`/v1/audios/${id}`, { method: "DELETE" });
+        if (res.ok) {
+          alert("Audio deleted");
+          loadAudios(); // refresh table
+        } else {
+          const data = await res.json();
+          alert("Failed to delete: " + (data.detail || res.statusText));
+        }
+      } catch (err) {
+        console.error("Delete failed:", err);
+        alert("Delete failed: " + err.message);
+      }
     }
 
     // ======== INIT ========
@@ -266,4 +327,5 @@
     loadAudios();
   </script>
 </body>
+
 </html>
